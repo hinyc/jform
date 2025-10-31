@@ -1,0 +1,23 @@
+import Image from "next/image";
+import Link from "next/link";
+import React from "react";
+
+/**
+ * height: 72px;
+ * @returns
+ */
+export default function Navigation() {
+  return (
+    <nav className=" flex items-center justify-between p-4 h-18 bg-white dark:bg-black">
+      <Link href="/">
+        <Image
+          src="/logo.png"
+          alt="JForm"
+          width={488}
+          height={108}
+          className="w-auto h-10"
+        />
+      </Link>
+    </nav>
+  );
+}
