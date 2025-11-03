@@ -1,8 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import type { SearchResult } from '@/lib/types/jsonFormatter';
 
 interface JsonTreeNodeProps {
   keyName: string | number | null;
@@ -10,6 +11,9 @@ interface JsonTreeNodeProps {
   depth: number;
   path: string;
   highlightedPaths?: Set<string>;
+  searchResults?: SearchResult[];
+  inputId?: string;
+  pathsToExpand?: Set<string>;
 }
 
 function formatValue(value: unknown): string {
@@ -38,12 +42,33 @@ export function JsonTreeNode({
   depth,
   path,
   highlightedPaths = new Set(),
+  searchResults = [],
+  inputId = '',
+  pathsToExpand = new Set(),
 }: JsonTreeNodeProps) {
-  const [isExpanded, setIsExpanded] = useState(depth < 2);
   const valueType = getValueType(value);
   const isExpandable = valueType === 'object' || valueType === 'array';
-  const indent = depth * 20;
-  const isHighlighted = highlightedPaths.has(path);
+  const indentSpaces = '  '.repeat(depth);
+  
+  // 검색 결과에서 현재 경로에 해당하는 결과 찾기
+  const currentSearchResult = searchResults.find(
+    (result) => result.inputId === inputId && result.path === path
+  );
+  const isKeyHighlighted = currentSearchResult?.matchedField === 'key';
+  const isValueHighlighted = currentSearchResult?.matchedField === 'value';
+  
+  // 초기 렌더링 시 확장해야 하는 경로인지 확인
+  const shouldExpandInitially = pathsToExpand.has(path) && isExpandable;
+  const [isExpanded, setIsExpanded] = useState(
+    shouldExpandInitially || depth < 2
+  );
+  
+  // pathsToExpand가 변경될 때 확장 상태 업데이트
+  useEffect(() => {
+    if (pathsToExpand.has(path) && isExpandable && !isExpanded) {
+      setIsExpanded(true);
+    }
+  }, [pathsToExpand, path, isExpandable, isExpanded]);
 
   const toggleExpand = () => {
     if (isExpandable) {
@@ -53,9 +78,15 @@ export function JsonTreeNode({
 
   const renderKey = () => {
     if (keyName === null) return null;
+    const keyDisplay = typeof keyName === 'number' ? `[${keyName}]` : `"${keyName}"`;
     return (
-      <span className="text-blue-600 dark:text-blue-400 font-medium">
-        {typeof keyName === 'number' ? `[${keyName}]` : `"${keyName}"`}
+      <span
+        className={cn(
+          'text-blue-600 dark:text-blue-400 font-medium',
+          isKeyHighlighted && 'bg-yellow-200 dark:bg-yellow-800 rounded px-1'
+        )}
+      >
+        {keyDisplay}
       </span>
     );
   };
@@ -71,7 +102,16 @@ export function JsonTreeNode({
             ? 'text-orange-600 dark:text-orange-400'
             : 'text-gray-500 dark:text-gray-400';
 
-    return <span className={valueClass}>{formatted}</span>;
+    return (
+      <span
+        className={cn(
+          valueClass,
+          isValueHighlighted && 'bg-yellow-200 dark:bg-yellow-800 rounded px-1'
+        )}
+      >
+        {formatted}
+      </span>
+    );
   };
 
   const renderExpandableContent = () => {
@@ -94,6 +134,9 @@ export function JsonTreeNode({
                 depth={depth + 1}
                 path={childPath}
                 highlightedPaths={highlightedPaths}
+                searchResults={searchResults}
+                inputId={inputId}
+                pathsToExpand={pathsToExpand}
               />
             );
           })}
@@ -114,6 +157,9 @@ export function JsonTreeNode({
                 depth={depth + 1}
                 path={childPath}
                 highlightedPaths={highlightedPaths}
+                searchResults={searchResults}
+                inputId={inputId}
+                pathsToExpand={pathsToExpand}
               />
             );
           })}
@@ -125,13 +171,10 @@ export function JsonTreeNode({
   };
 
   return (
-    <div
-      className={cn(
-        'flex items-start gap-1 py-0.5',
-        isHighlighted && 'bg-yellow-100 dark:bg-yellow-900/20 rounded px-1'
-      )}
-      style={{ paddingLeft: `${indent}px` }}
-    >
+    <div className="flex items-start gap-1 py-0.5">
+      <span className="select-none whitespace-pre font-mono text-transparent">
+        {indentSpaces}
+      </span>
       {isExpandable && (
         <button
           onClick={toggleExpand}
