@@ -1,0 +1,162 @@
+import { create } from 'zustand';
+import type { JsonInput, SearchResult } from '../types/jsonFormatter';
+
+interface JsonFormatterState {
+  jsonObjects: JsonInput[];
+  searchQuery: string;
+  searchResults: SearchResult[];
+  
+  addJsonObject: (rawText: string) => void;
+  removeJsonObject: (id: string) => void;
+  updateJsonObject: (id: string, rawText: string) => void;
+  setSearchQuery: (query: string) => void;
+  performSearch: () => void;
+  clearSearch: () => void;
+}
+
+export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
+  jsonObjects: [],
+  searchQuery: '',
+  searchResults: [],
+
+  addJsonObject: (rawText: string) => {
+    const id = crypto.randomUUID();
+    let parsedData: unknown | null = null;
+    let error: string | null = null;
+
+    try {
+      parsedData = JSON.parse(rawText);
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Invalid JSON';
+    }
+
+    set((state) => ({
+      jsonObjects: [
+        ...state.jsonObjects,
+        { id, rawText, parsedData, error },
+      ],
+    }));
+  },
+
+  removeJsonObject: (id: string) => {
+    set((state) => ({
+      jsonObjects: state.jsonObjects.filter((obj) => obj.id !== id),
+    }));
+  },
+
+  updateJsonObject: (id: string, rawText: string) => {
+    let parsedData: unknown | null = null;
+    let error: string | null = null;
+
+    try {
+      parsedData = JSON.parse(rawText);
+    } catch (e) {
+      error = e instanceof Error ? e.message : 'Invalid JSON';
+    }
+
+    set((state) => ({
+      jsonObjects: state.jsonObjects.map((obj) =>
+        obj.id === id ? { ...obj, rawText, parsedData, error } : obj
+      ),
+    }));
+  },
+
+  setSearchQuery: (query: string) => {
+    set({ searchQuery: query });
+  },
+
+  performSearch: () => {
+    const { jsonObjects, searchQuery } = get();
+    
+    if (!searchQuery.trim()) {
+      set({ searchResults: [] });
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const results: SearchResult[] = [];
+
+    const searchRecursive = (
+      data: unknown,
+      inputId: string,
+      path: string,
+      key: string | number | null
+    ): void => {
+      if (data === null || data === undefined) return;
+
+      if (typeof data === 'object' && !Array.isArray(data) && data !== null) {
+        // 객체인 경우
+        for (const [objKey, objValue] of Object.entries(data)) {
+          const currentPath = path ? `${path}.${objKey}` : objKey;
+          
+          // 키 매칭
+          if (objKey.toLowerCase().includes(query)) {
+            results.push({
+              inputId,
+              path: currentPath,
+              key: objKey,
+              value: objValue,
+              matchedField: 'key',
+            });
+          }
+          
+          // 값 매칭
+          if (typeof objValue === 'string' && objValue.toLowerCase().includes(query)) {
+            results.push({
+              inputId,
+              path: currentPath,
+              key: objKey,
+              value: objValue,
+              matchedField: 'value',
+            });
+          }
+          
+          searchRecursive(objValue, inputId, currentPath, objKey);
+        }
+      } else if (Array.isArray(data)) {
+        // 배열인 경우
+        data.forEach((item, index) => {
+          const currentPath = `${path}[${index}]`;
+          
+          // 값 매칭
+          if (typeof item === 'string' && item.toLowerCase().includes(query)) {
+            results.push({
+              inputId,
+              path: currentPath,
+              key: index,
+              value: item,
+              matchedField: 'value',
+            });
+          }
+          
+          searchRecursive(item, inputId, currentPath, index);
+        });
+      } else {
+        // 원시값인 경우
+        const stringValue = String(data);
+        if (stringValue.toLowerCase().includes(query)) {
+          results.push({
+            inputId,
+            path,
+            key,
+            value: data,
+            matchedField: 'value',
+          });
+        }
+      }
+    };
+
+    jsonObjects.forEach((jsonObj) => {
+      if (jsonObj.parsedData && !jsonObj.error) {
+        searchRecursive(jsonObj.parsedData, jsonObj.id, '', null);
+      }
+    });
+
+    set({ searchResults: results });
+  },
+
+  clearSearch: () => {
+    set({ searchQuery: '', searchResults: [] });
+  },
+}));
+
