@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { JsonTreeView } from './JsonTreeView';
-import { JsonSearchBar } from './JsonSearchBar';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useJsonFormatterStore } from '@/lib/stores/jsonFormatterStore';
+import { JsonTreeView } from "./JsonTreeView";
+import { JsonSearchBar } from "./JsonSearchBar";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 
 export function JsonResultArea() {
   const jsonObjects = useJsonFormatterStore((state) => state.jsonObjects);
@@ -11,9 +11,11 @@ export function JsonResultArea() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="mb-4">
-        <h2 className="text-lg font-semibold mb-4">JSON 결과</h2>
-        <JsonSearchBar />
+      <div className="flex mb-4 gap-4">
+        <h2 className="text-lg font-semibold mb-4 shrink-0">JSON 결과</h2>
+        <div className="w-full">
+          <JsonSearchBar />
+        </div>
       </div>
 
       <ScrollArea className="flex-1">
@@ -41,4 +43,3 @@ export function JsonResultArea() {
     </div>
   );
 }
-

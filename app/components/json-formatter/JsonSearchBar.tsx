@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Search, X } from 'lucide-react';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { useJsonFormatterStore } from '@/lib/stores/jsonFormatterStore';
+import { useState } from "react";
+import { Search, X } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 
 export function JsonSearchBar() {
   const searchQuery = useJsonFormatterStore((state) => state.searchQuery);
@@ -12,7 +12,7 @@ export function JsonSearchBar() {
   const performSearch = useJsonFormatterStore((state) => state.performSearch);
   const clearSearch = useJsonFormatterStore((state) => state.clearSearch);
   const searchResults = useJsonFormatterStore((state) => state.searchResults);
-  
+
   const [localQuery, setLocalQuery] = useState(searchQuery);
 
   const handleSearch = () => {
@@ -21,12 +21,12 @@ export function JsonSearchBar() {
   };
 
   const handleClear = () => {
-    setLocalQuery('');
+    setLocalQuery("");
     clearSearch();
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter') {
+    if (e.key === "Enter") {
       handleSearch();
     }
   };
@@ -41,7 +41,7 @@ export function JsonSearchBar() {
             placeholder="키나 값을 검색하세요..."
             value={localQuery}
             onChange={(e) => setLocalQuery(e.target.value)}
-            onKeyPress={handleKeyPress}
+            onKeyDown={handleKeyPress}
             className="pl-9 pr-9"
           />
           {localQuery && (
@@ -65,4 +65,3 @@ export function JsonSearchBar() {
     </div>
   );
 }
-

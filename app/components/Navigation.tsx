@@ -9,7 +9,7 @@ import { ShareButton } from "./json-formatter/ShareButton";
  */
 export default function Navigation() {
   return (
-    <nav className=" flex items-center justify-between p-4 h-18 bg-white dark:bg-black">
+    <nav className=" flex items-center justify-between p-4 h-18 bg-white dark:bg-black shadow-md">
       <Link href="/">
         <Image
           src="/logo.png"
