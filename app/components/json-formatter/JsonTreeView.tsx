@@ -99,7 +99,7 @@ export function JsonTreeView({
     <Card className="h-full flex flex-col">
       <CardContent className="flex-1 p-4 overflow-hidden">
         <ScrollArea className="h-full w-full">
-          <div className="font-mono text-sm">
+          <div className="font-mono text-sm overflow-x-auto">
             <JsonTreeNode
               keyName={null}
               value={data}

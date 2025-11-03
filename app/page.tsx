@@ -23,11 +23,11 @@ export default function Home() {
 
   return (
     <div className="flex min-h-screen bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex w-full flex-row gap-6 p-6">
-        <div className="flex-1">
+      <main className="flex w-full flex-row gap-6 p-6 overflow-x-auto">
+        <div className="flex-shrink-0" style={{ minWidth: '200px', maxWidth: '40vw', width: '40%' }}>
           <JsonInputArea />
         </div>
-        <div className="flex-1">
+        <div className="flex-shrink-0" style={{ minWidth: '400px', maxWidth: '60vw', width: '60%' }}>
           <JsonResultArea />
         </div>
       </main>

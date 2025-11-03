@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { SearchResult } from '@/lib/types/jsonFormatter';
@@ -63,11 +63,18 @@ export function JsonTreeNode({
     shouldExpandInitially || depth < 2
   );
   
-  // pathsToExpand가 변경될 때 확장 상태 업데이트
+  // 검색 결과가 있을 때만 한 번 자동 확장 (사용자 조작은 이후 자유롭게)
+  const prevPathsToExpandRef = useRef<Set<string>>(new Set());
   useEffect(() => {
-    if (pathsToExpand.has(path) && isExpandable && !isExpanded) {
+    // pathsToExpand가 새로 추가되었을 때만 확장
+    const wasInPrevious = prevPathsToExpandRef.current.has(path);
+    const isInCurrent = pathsToExpand.has(path);
+    
+    if (!wasInPrevious && isInCurrent && isExpandable && !isExpanded) {
       setIsExpanded(true);
     }
+    
+    prevPathsToExpandRef.current = new Set(pathsToExpand);
   }, [pathsToExpand, path, isExpandable, isExpanded]);
 
   const toggleExpand = () => {
@@ -117,7 +124,11 @@ export function JsonTreeNode({
   const renderExpandableContent = () => {
     if (!isExpanded) {
       const preview = formatValue(value);
-      return <span className="text-gray-500 dark:text-gray-400">{preview}</span>;
+      return (
+        <span className="text-gray-500 dark:text-gray-400 italic">
+          {preview}
+        </span>
+      );
     }
 
     if (valueType === 'object' && value !== null && typeof value === 'object') {
@@ -203,10 +214,14 @@ export function JsonTreeNode({
             {valueType === 'object' && (
               <>
                 <span className="text-gray-600 dark:text-gray-400">{'{'}</span>
-                {isExpanded && (
+                {isExpanded ? (
                   <div className="ml-0">
                     {renderExpandableContent()}
                   </div>
+                ) : (
+                  <span className="text-gray-500 dark:text-gray-400 italic mx-1">
+                    {formatValue(value)}
+                  </span>
                 )}
                 <span className="text-gray-600 dark:text-gray-400">{'}'}</span>
               </>
@@ -214,10 +229,14 @@ export function JsonTreeNode({
             {valueType === 'array' && (
               <>
                 <span className="text-gray-600 dark:text-gray-400">{'['}</span>
-                {isExpanded && (
+                {isExpanded ? (
                   <div className="ml-0">
                     {renderExpandableContent()}
                   </div>
+                ) : (
+                  <span className="text-gray-500 dark:text-gray-400 italic mx-1">
+                    {formatValue(value)}
+                  </span>
                 )}
                 <span className="text-gray-600 dark:text-gray-400">{']'}</span>
               </>

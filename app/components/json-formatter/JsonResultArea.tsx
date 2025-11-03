@@ -2,7 +2,6 @@
 
 import { JsonTreeView } from './JsonTreeView';
 import { JsonSearchBar } from './JsonSearchBar';
-import { ShareButton } from './ShareButton';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useJsonFormatterStore } from '@/lib/stores/jsonFormatterStore';
 
@@ -12,12 +11,8 @@ export function JsonResultArea() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-semibold">JSON 결과</h2>
-        <ShareButton />
-      </div>
-      
       <div className="mb-4">
+        <h2 className="text-lg font-semibold mb-4">JSON 결과</h2>
         <JsonSearchBar />
       </div>
 
@@ -31,7 +26,7 @@ export function JsonResultArea() {
             </div>
           ) : (
             jsonObjects.map((jsonObj) => (
-              <div key={jsonObj.id} className="h-96">
+              <div key={jsonObj.id} className="h-64">
                 <JsonTreeView
                   inputId={jsonObj.id}
                   data={jsonObj.parsedData}

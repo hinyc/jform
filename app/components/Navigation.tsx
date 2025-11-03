@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { ShareButton } from "./json-formatter/ShareButton";
 
 /**
  * height: 72px;
@@ -18,6 +19,7 @@ export default function Navigation() {
           className="w-auto h-10"
         />
       </Link>
+      <ShareButton />
     </nav>
   );
 }
