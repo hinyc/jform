@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Trash2 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useJsonFormatterStore } from '@/lib/stores/jsonFormatterStore';
+import { useState, useRef, useLayoutEffect } from "react";
+import { Trash2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 
 interface JsonInputCardProps {
   id: string;
@@ -12,19 +12,41 @@ interface JsonInputCardProps {
   onRemove?: () => void;
 }
 
-export function JsonInputCard({ id, initialValue = '', onRemove }: JsonInputCardProps) {
+export function JsonInputCard({
+  id,
+  initialValue = "",
+  onRemove,
+}: JsonInputCardProps) {
   const [localValue, setLocalValue] = useState(initialValue);
-  const updateJsonObject = useJsonFormatterStore((state) => state.updateJsonObject);
+  const updateJsonObject = useJsonFormatterStore(
+    (state) => state.updateJsonObject
+  );
+  const prevInitialValueRef = useRef(initialValue);
+  const isUserEditingRef = useRef(false);
 
-  useEffect(() => {
-    if (initialValue !== localValue) {
-      setLocalValue(initialValue);
+  // initialValue가 변경되었을 때만 로컬 상태 동기화 (사용자가 편집 중이 아닐 때만)
+  // 외부 prop 변경 시 내부 상태 동기화는 정당한 사용 사례입니다
+  useLayoutEffect(() => {
+    if (
+      prevInitialValueRef.current !== initialValue &&
+      !isUserEditingRef.current
+    ) {
+      prevInitialValueRef.current = initialValue;
+      // 외부 prop 변경에 따른 상태 동기화 (비동기로 처리하여 렌더링 중 상태 변경 방지)
+      Promise.resolve().then(() => {
+        setLocalValue(initialValue);
+      });
     }
   }, [initialValue]);
 
   const handleChange = (value: string) => {
+    isUserEditingRef.current = true;
     setLocalValue(value);
     updateJsonObject(id, value);
+    // 편집 후 짧은 시간 후에 플래그 리셋
+    setTimeout(() => {
+      isUserEditingRef.current = false;
+    }, 1000);
   };
 
   const handleRemove = () => {
@@ -57,4 +79,3 @@ export function JsonInputCard({ id, initialValue = '', onRemove }: JsonInputCard
     </Card>
   );
 }
-
