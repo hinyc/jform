@@ -1,29 +1,29 @@
-import { create } from 'zustand';
-import type { JsonInput, SearchResult } from '../types/jsonFormatter';
+import { create } from "zustand";
+import type { JsonInput, SearchResult } from "../types/jsonFormatter";
 
 interface JsonFormatterState {
   jsonObjects: JsonInput[];
   searchQuery: string;
   searchResults: SearchResult[];
-  searchMode: 'global' | 'individual';
+  searchMode: "global" | "individual";
   individualSearchResults: Record<string, SearchResult[]>;
-  
+
   addJsonObject: (rawText: string) => void;
   removeJsonObject: (id: string) => void;
   updateJsonObject: (id: string, rawText: string) => void;
   setSearchQuery: (query: string) => void;
   performSearch: () => void;
   clearSearch: () => void;
-  setSearchMode: (mode: 'global' | 'individual') => void;
+  setSearchMode: (mode: "global" | "individual") => void;
   performIndividualSearch: (inputId: string, query: string) => void;
   clearIndividualSearch: (inputId: string) => void;
 }
 
 export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
   jsonObjects: [],
-  searchQuery: '',
+  searchQuery: "",
   searchResults: [],
-  searchMode: 'global',
+  searchMode: "global",
   individualSearchResults: {},
 
   addJsonObject: (rawText: string) => {
@@ -33,19 +33,16 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
 
     // 빈 문자열이나 공백만 있는 경우 파싱 시도하지 않음
     const trimmedText = rawText.trim();
-    if (trimmedText !== '') {
+    if (trimmedText !== "") {
       try {
         parsedData = JSON.parse(rawText);
       } catch (e) {
-        error = e instanceof Error ? e.message : 'Invalid JSON';
+        error = e instanceof Error ? e.message : "Invalid JSON";
       }
     }
 
     set((state) => ({
-      jsonObjects: [
-        ...state.jsonObjects,
-        { id, rawText, parsedData, error },
-      ],
+      jsonObjects: [...state.jsonObjects, { id, rawText, parsedData, error }],
     }));
   },
 
@@ -61,10 +58,12 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
 
     // 빈 문자열이나 공백만 있는 경우 파싱 시도하지 않음
     const trimmedText = rawText.trim();
-    if (trimmedText === '') {
+    if (trimmedText === "") {
       set((state) => ({
         jsonObjects: state.jsonObjects.map((obj) =>
-          obj.id === id ? { ...obj, rawText, parsedData: null, error: null } : obj
+          obj.id === id
+            ? { ...obj, rawText, parsedData: null, error: null }
+            : obj
         ),
       }));
       return;
@@ -73,7 +72,7 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
     try {
       parsedData = JSON.parse(rawText);
     } catch (e) {
-      error = e instanceof Error ? e.message : 'Invalid JSON';
+      error = e instanceof Error ? e.message : "Invalid JSON";
     }
 
     set((state) => ({
@@ -89,7 +88,7 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
 
   performSearch: () => {
     const { jsonObjects, searchQuery } = get();
-    
+
     if (!searchQuery.trim()) {
       set({ searchResults: [] });
       return;
@@ -101,76 +100,65 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
     const searchRecursive = (
       data: unknown,
       inputId: string,
-      path: string,
-      key: string | number | null
+      path: string
     ): void => {
       if (data === null || data === undefined) return;
 
-      if (typeof data === 'object' && !Array.isArray(data) && data !== null) {
+      if (typeof data === "object" && !Array.isArray(data) && data !== null) {
         // 객체인 경우
         for (const [objKey, objValue] of Object.entries(data)) {
           const currentPath = path ? `${path}.${objKey}` : objKey;
-          
-          // 키 매칭
-          if (objKey.toLowerCase().includes(query)) {
+
+          // 키 매칭 여부
+          const keyMatches = objKey.toLowerCase().includes(query);
+          // 값 매칭 여부 (문자열인 경우만)
+          const valueMatches =
+            typeof objValue === "string" &&
+            objValue.toLowerCase().includes(query);
+
+          // 키 또는 값 중 하나라도 매칭되면 하나의 결과만 추가
+          if (keyMatches || valueMatches) {
             results.push({
               inputId,
               path: currentPath,
               key: objKey,
               value: objValue,
-              matchedField: 'key',
+              matchedField: keyMatches ? "key" : "value",
             });
           }
-          
-          // 값 매칭
-          if (typeof objValue === 'string' && objValue.toLowerCase().includes(query)) {
-            results.push({
-              inputId,
-              path: currentPath,
-              key: objKey,
-              value: objValue,
-              matchedField: 'value',
-            });
+
+          // 원시값(문자열, 숫자, boolean 등)은 더 이상 재귀할 필요 없음
+          if (typeof objValue === "object" && objValue !== null) {
+            searchRecursive(objValue, inputId, currentPath);
           }
-          
-          searchRecursive(objValue, inputId, currentPath, objKey);
         }
       } else if (Array.isArray(data)) {
         // 배열인 경우
         data.forEach((item, index) => {
           const currentPath = `${path}[${index}]`;
-          
+
           // 값 매칭
-          if (typeof item === 'string' && item.toLowerCase().includes(query)) {
+          if (typeof item === "string" && item.toLowerCase().includes(query)) {
             results.push({
               inputId,
               path: currentPath,
               key: index,
               value: item,
-              matchedField: 'value',
+              matchedField: "value",
             });
           }
-          
-          searchRecursive(item, inputId, currentPath, index);
+
+          // 원시값은 더 이상 재귀할 필요 없음
+          if (typeof item === "object" && item !== null) {
+            searchRecursive(item, inputId, currentPath);
+          }
         });
-      } else {
-        // 원시값인 경우
-        const stringValue = String(data);
-        if (stringValue.toLowerCase().includes(query)) {
-          results.push({
-            inputId,
-            path,
-            key,
-            value: data,
-            matchedField: 'value',
-          });
-        }
       }
     };
 
     jsonObjects.forEach((jsonObj) => {
       if (jsonObj.parsedData && !jsonObj.error) {
-        searchRecursive(jsonObj.parsedData, jsonObj.id, '', null);
+        searchRecursive(jsonObj.parsedData, jsonObj.id, "");
       }
     });
 
@@ -178,13 +166,13 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
   },
 
   clearSearch: () => {
-    set({ searchQuery: '', searchResults: [] });
+    set({ searchQuery: "", searchResults: [] });
   },
 
-  setSearchMode: (mode: 'global' | 'individual') => {
+  setSearchMode: (mode: "global" | "individual") => {
     set({ searchMode: mode });
     // 모드 변경 시 검색 결과 초기화
-    if (mode === 'global') {
+    if (mode === "global") {
       set({ individualSearchResults: {} });
     } else {
       set({ searchResults: [] });
@@ -193,7 +181,7 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
 
   performIndividualSearch: (inputId: string, query: string) => {
     const { jsonObjects } = get();
-    
+
     if (!query.trim()) {
       set((state) => {
         const newIndividualResults = { ...state.individualSearchResults };
@@ -216,76 +204,65 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
       return;
     }
 
-    const searchRecursive = (
-      data: unknown,
-      path: string,
-      key: string | number | null
-    ): void => {
+    const searchRecursive = (data: unknown, path: string): void => {
       if (data === null || data === undefined) return;
 
-      if (typeof data === 'object' && !Array.isArray(data) && data !== null) {
+      if (typeof data === "object" && !Array.isArray(data) && data !== null) {
         // 객체인 경우
         for (const [objKey, objValue] of Object.entries(data)) {
           const currentPath = path ? `${path}.${objKey}` : objKey;
-          
-          // 키 매칭
-          if (objKey.toLowerCase().includes(searchQuery)) {
+
+          // 키 매칭 여부
+          const keyMatches = objKey.toLowerCase().includes(searchQuery);
+          // 값 매칭 여부 (문자열인 경우만)
+          const valueMatches =
+            typeof objValue === "string" &&
+            objValue.toLowerCase().includes(searchQuery);
+
+          // 키 또는 값 중 하나라도 매칭되면 하나의 결과만 추가
+          if (keyMatches || valueMatches) {
             results.push({
               inputId,
               path: currentPath,
               key: objKey,
               value: objValue,
-              matchedField: 'key',
+              matchedField: keyMatches ? "key" : "value",
             });
           }
-          
-          // 값 매칭
-          if (typeof objValue === 'string' && objValue.toLowerCase().includes(searchQuery)) {
-            results.push({
-              inputId,
-              path: currentPath,
-              key: objKey,
-              value: objValue,
-              matchedField: 'value',
-            });
+
+          // 원시값(문자열, 숫자, boolean 등)은 더 이상 재귀할 필요 없음
+          if (typeof objValue === "object" && objValue !== null) {
+            searchRecursive(objValue, currentPath);
           }
-          
-          searchRecursive(objValue, currentPath, objKey);
         }
       } else if (Array.isArray(data)) {
         // 배열인 경우
         data.forEach((item, index) => {
           const currentPath = `${path}[${index}]`;
-          
+
           // 값 매칭
-          if (typeof item === 'string' && item.toLowerCase().includes(searchQuery)) {
+          if (
+            typeof item === "string" &&
+            item.toLowerCase().includes(searchQuery)
+          ) {
             results.push({
               inputId,
               path: currentPath,
               key: index,
               value: item,
-              matchedField: 'value',
+              matchedField: "value",
             });
           }
-          
-          searchRecursive(item, currentPath, index);
+
+          // 원시값은 더 이상 재귀할 필요 없음
+          if (typeof item === "object" && item !== null) {
+            searchRecursive(item, currentPath);
+          }
         });
-      } else {
-        // 원시값인 경우
-        const stringValue = String(data);
-        if (stringValue.toLowerCase().includes(searchQuery)) {
-          results.push({
-            inputId,
-            path,
-            key,
-            value: data,
-            matchedField: 'value',
-          });
-        }
       }
     };
 
-    searchRecursive(jsonObj.parsedData, '', null);
+    searchRecursive(jsonObj.parsedData, "");
 
     set((state) => ({
       individualSearchResults: {
@@ -303,4 +280,3 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
     });
   },
 }));
-

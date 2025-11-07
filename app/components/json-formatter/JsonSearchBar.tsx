@@ -36,11 +36,17 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
   const [localQuery, setLocalQuery] = useState(
     inputId ? "" : searchQuery
   );
+  // 검색을 실행했는지 여부 추적
+  const [hasSearched, setHasSearched] = useState(false);
 
   // 전체 검색 모드일 때 searchQuery 변경 시 로컬 상태 동기화
   useEffect(() => {
     if (!inputId) {
       setLocalQuery(searchQuery);
+      // searchQuery가 비어있으면 검색 실행 여부 초기화
+      if (!searchQuery.trim()) {
+        setHasSearched(false);
+      }
     }
   }, [searchQuery, inputId]);
 
@@ -48,15 +54,18 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
     if (inputId) {
       // 개별 검색
       performIndividualSearch(inputId, localQuery);
+      setHasSearched(true);
     } else {
       // 전체 검색
       setSearchQuery(localQuery);
       performSearch();
+      setHasSearched(true);
     }
   };
 
   const handleClear = () => {
     setLocalQuery("");
+    setHasSearched(false);
     if (inputId) {
       clearIndividualSearch(inputId);
     } else {
@@ -98,9 +107,11 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
           검색
         </Button>
       </div>
-      {currentSearchResults.length > 0 && (
+      {hasSearched && localQuery.trim() && (
         <div className="text-sm text-gray-600 dark:text-gray-400">
-          {currentSearchResults.length}개의 결과를 찾았습니다
+          {currentSearchResults.length > 0
+            ? `${currentSearchResults.length}개의 결과를 찾았습니다`
+            : "검색 결과가 없습니다"}
         </div>
       )}
     </div>
