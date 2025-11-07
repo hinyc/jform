@@ -111,10 +111,11 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
 
           // 키 매칭 여부
           const keyMatches = objKey.toLowerCase().includes(query);
-          // 값 매칭 여부 (문자열인 경우만)
+          // 값 매칭 여부 (원시값만: 문자열, 숫자, boolean, null)
           const valueMatches =
-            typeof objValue === "string" &&
-            objValue.toLowerCase().includes(query);
+            typeof objValue !== "object" &&
+            objValue !== undefined &&
+            String(objValue).toLowerCase().includes(query);
 
           // 키 또는 값 중 하나라도 매칭되면 하나의 결과만 추가
           if (keyMatches || valueMatches) {
@@ -137,8 +138,12 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
         data.forEach((item, index) => {
           const currentPath = `${path}[${index}]`;
 
-          // 값 매칭
-          if (typeof item === "string" && item.toLowerCase().includes(query)) {
+          // 값 매칭 (원시값만: 문자열, 숫자, boolean, null)
+          if (
+            typeof item !== "object" &&
+            item !== undefined &&
+            String(item).toLowerCase().includes(query)
+          ) {
             results.push({
               inputId,
               path: currentPath,
@@ -214,10 +219,11 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
 
           // 키 매칭 여부
           const keyMatches = objKey.toLowerCase().includes(searchQuery);
-          // 값 매칭 여부 (문자열인 경우만)
+          // 값 매칭 여부 (원시값만: 문자열, 숫자, boolean, null)
           const valueMatches =
-            typeof objValue === "string" &&
-            objValue.toLowerCase().includes(searchQuery);
+            typeof objValue !== "object" &&
+            objValue !== undefined &&
+            String(objValue).toLowerCase().includes(searchQuery);
 
           // 키 또는 값 중 하나라도 매칭되면 하나의 결과만 추가
           if (keyMatches || valueMatches) {
@@ -240,10 +246,11 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
         data.forEach((item, index) => {
           const currentPath = `${path}[${index}]`;
 
-          // 값 매칭
+          // 값 매칭 (원시값만: 문자열, 숫자, boolean, null)
           if (
-            typeof item === "string" &&
-            item.toLowerCase().includes(searchQuery)
+            typeof item !== "object" &&
+            item !== undefined &&
+            String(item).toLowerCase().includes(searchQuery)
           ) {
             results.push({
               inputId,
