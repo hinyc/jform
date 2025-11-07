@@ -1,10 +1,10 @@
-'use client';
+"use client";
 
-import { useMemo } from 'react';
-import { JsonTreeNode } from './JsonTreeNode';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import type { SearchResult } from '@/lib/types/jsonFormatter';
+import { useMemo } from "react";
+import { JsonTreeNode } from "./JsonTreeNode";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import type { SearchResult } from "@/lib/types/jsonFormatter";
 
 interface JsonTreeViewProps {
   inputId: string;
@@ -17,22 +17,22 @@ interface JsonTreeViewProps {
 // 예: "user.profile.name" -> ["", "user", "user.profile", "user.profile.name"]
 // 예: "items[0].name" -> ["", "items", "items[0]", "items[0].name"]
 function getAllParentPaths(path: string): string[] {
-  const paths: string[] = [''];
+  const paths: string[] = [""];
   if (!path) return paths;
 
   // 정규식으로 경로 파싱: 속성명과 배열 인덱스 분리
   const matches = path.match(/([^.[\]]+|\[[^\]]+\])/g);
   if (!matches) return paths;
 
-  let accumulatedPath = '';
+  let accumulatedPath = "";
   for (const match of matches) {
-    if (match.startsWith('[')) {
+    if (match.startsWith("[")) {
       // 배열 인덱스
       accumulatedPath += match;
     } else {
       // 속성명
       if (accumulatedPath) {
-        accumulatedPath += '.' + match;
+        accumulatedPath += "." + match;
       } else {
         accumulatedPath = match;
       }
@@ -49,8 +49,10 @@ export function JsonTreeView({
   error,
   searchResults,
 }: JsonTreeViewProps) {
-  const relevantResults = searchResults.filter((result) => result.inputId === inputId);
-  
+  const relevantResults = searchResults.filter(
+    (result) => result.inputId === inputId
+  );
+
   const highlightedPaths = useMemo(
     () => new Set(relevantResults.map((r) => r.path)),
     [relevantResults]
@@ -116,4 +118,3 @@ export function JsonTreeView({
     </Card>
   );
 }
-

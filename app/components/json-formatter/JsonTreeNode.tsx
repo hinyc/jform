@@ -49,6 +49,7 @@ export function JsonTreeNode({
 }: JsonTreeNodeProps) {
   const valueType = getValueType(value);
   const isExpandable = valueType === "object" || valueType === "array";
+  // 뎁스당 스페이스 2개로 들여쓰기
   const indentSpaces = "  ".repeat(depth);
 
   // 검색 결과에서 현재 경로에 해당하는 결과 찾기
@@ -144,7 +145,7 @@ export function JsonTreeNode({
                 key={key}
                 keyName={key}
                 value={val}
-                depth={depth + 1}
+                depth={depth + 2}
                 path={childPath}
                 highlightedPaths={highlightedPaths}
                 searchResults={searchResults}
@@ -167,7 +168,7 @@ export function JsonTreeNode({
                 key={index}
                 keyName={index}
                 value={item}
-                depth={depth + 1}
+                depth={depth + 2}
                 path={childPath}
                 highlightedPaths={highlightedPaths}
                 searchResults={searchResults}
@@ -183,67 +184,108 @@ export function JsonTreeNode({
     return null;
   };
 
-  return (
-    <div className="flex items-start gap-1 py-0.5">
-      <span className="select-none whitespace-pre font-mono text-transparent">
-        {indentSpaces}
-      </span>
-      {isExpandable && (
+  // Primitive value - single line
+  if (!isExpandable) {
+    return (
+      <div className="flex items-start gap-1 py-0.5">
+        <span className="select-none whitespace-pre font-mono text-transparent">
+          {indentSpaces}
+        </span>
+        <div className="w-4 shrink-0" />
+        <div className="flex items-start gap-1 flex-1 min-w-0">
+          {keyName !== null && (
+            <>
+              {renderKey()}
+              <span className="text-gray-500 dark:text-gray-400">:</span>
+              <span className="w-2" />
+            </>
+          )}
+          {renderPrimitive()}
+        </div>
+      </div>
+    );
+  }
+
+  // Expandable object/array
+  const openBracket = valueType === "object" ? "{" : "[";
+  const closeBracket = valueType === "object" ? "}" : "]";
+
+  if (!isExpanded) {
+    // Collapsed view - single line
+    return (
+      <div className="flex items-start gap-1 py-0.5">
+        <span className="select-none whitespace-pre font-mono text-transparent">
+          {indentSpaces}
+        </span>
         <button
           onClick={toggleExpand}
           className="shrink-0 mt-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-0.5 transition-colors"
-          aria-label={isExpanded ? "Collapse" : "Expand"}
+          aria-label="Expand"
         >
-          {isExpanded ? (
-            <ChevronDown className="size-4 text-gray-600 dark:text-gray-400" />
-          ) : (
-            <ChevronRight className="size-4 text-gray-600 dark:text-gray-400" />
-          )}
+          <ChevronRight className="size-4 text-gray-600 dark:text-gray-400" />
         </button>
-      )}
-      {!isExpandable && <div className="w-5 shrink-0" />}
-
-      <div className="flex items-start gap-1 flex-1 min-w-0">
-        {keyName !== null && (
-          <>
-            {renderKey()}
-            <span className="text-gray-500 dark:text-gray-400">:</span>
-            <span className="w-2" />
-          </>
-        )}
-        {isExpandable ? (
-          <div className="flex-1">
-            {valueType === "object" && (
-              <>
-                <span className="text-gray-600 dark:text-gray-400">{"{"}</span>
-                {isExpanded ? (
-                  <div className="ml-0">{renderExpandableContent()}</div>
-                ) : (
-                  <span className="text-gray-500 dark:text-gray-400 italic mx-1">
-                    {formatValue(value)}
-                  </span>
-                )}
-                <span className="text-gray-600 dark:text-gray-400">{"}"}</span>
-              </>
-            )}
-            {valueType === "array" && (
-              <>
-                <span className="text-gray-600 dark:text-gray-400">{"["}</span>
-                {isExpanded ? (
-                  <div className="ml-0">{renderExpandableContent()}</div>
-                ) : (
-                  <span className="text-gray-500 dark:text-gray-400 italic mx-1">
-                    {formatValue(value)}
-                  </span>
-                )}
-                <span className="text-gray-600 dark:text-gray-400">{"]"}</span>
-              </>
-            )}
-          </div>
-        ) : (
-          renderPrimitive()
-        )}
+        <div className="flex items-start gap-1 flex-1 min-w-0">
+          {keyName !== null && (
+            <>
+              {renderKey()}
+              <span className="text-gray-500 dark:text-gray-400">:</span>
+              <span className="w-2" />
+            </>
+          )}
+          <span className="text-gray-600 dark:text-gray-400">
+            {openBracket}
+          </span>
+          <span className="text-gray-500 dark:text-gray-400 italic mx-1">
+            {formatValue(value)}
+          </span>
+          <span className="text-gray-600 dark:text-gray-400">
+            {closeBracket}
+          </span>
+        </div>
       </div>
-    </div>
+    );
+  }
+
+  // Expanded view - multi-line
+  return (
+    <>
+      {/* Opening line with key and bracket */}
+      <div className="flex items-start gap-1 py-0.5">
+        <span className="select-none whitespace-pre font-mono text-transparent">
+          {indentSpaces}
+        </span>
+        <button
+          onClick={toggleExpand}
+          className="shrink-0 mt-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-0.5 transition-colors"
+          aria-label="Collapse"
+        >
+          <ChevronDown className="size-4 text-gray-600 dark:text-gray-400" />
+        </button>
+        <div className="flex items-start gap-1">
+          {keyName !== null && (
+            <>
+              {renderKey()}
+              <span className="text-gray-500 dark:text-gray-400">:</span>
+              <span className="w-2" />
+            </>
+          )}
+          <span className="text-gray-600 dark:text-gray-400">
+            {openBracket}
+          </span>
+        </div>
+      </div>
+
+      {/* Child content */}
+      {renderExpandableContent()}
+
+      {/* Closing bracket */}
+      <div className="flex items-start gap-1 py-0.5">
+        <span className="select-none whitespace-pre font-mono text-transparent">
+          {indentSpaces}
+        </span>
+        <div className="w-4 shrink-0" />
+        <span className="text-gray-600 dark:text-gray-400">{closeBracket}</span>
+      </div>
+    </>
   );
 }
