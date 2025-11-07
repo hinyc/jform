@@ -59,14 +59,16 @@ export function JsonInputCard({
     <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">JSON Input</CardTitle>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          onClick={handleRemove}
-          className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-        >
-          <Trash2 className="size-4" />
-        </Button>
+        {onRemove && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleRemove}
+            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        )}
       </CardHeader>
       <CardContent className="flex-1 p-4 pt-0 overflow-hidden">
         <textarea

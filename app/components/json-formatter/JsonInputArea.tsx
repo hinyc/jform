@@ -1,18 +1,20 @@
-'use client';
+"use client";
 
-import { Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { JsonInputCard } from './JsonInputCard';
-import { useJsonFormatterStore } from '@/lib/stores/jsonFormatterStore';
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { JsonInputCard } from "./JsonInputCard";
+import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 
 export function JsonInputArea() {
   const jsonObjects = useJsonFormatterStore((state) => state.jsonObjects);
   const addJsonObject = useJsonFormatterStore((state) => state.addJsonObject);
-  const removeJsonObject = useJsonFormatterStore((state) => state.removeJsonObject);
+  const removeJsonObject = useJsonFormatterStore(
+    (state) => state.removeJsonObject
+  );
 
   const handleAdd = () => {
-    addJsonObject('');
+    addJsonObject("");
   };
 
   const handleRemove = (id: string) => {
@@ -21,7 +23,7 @@ export function JsonInputArea() {
 
   return (
     <div className="h-full flex flex-col">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 h-12">
         <h2 className="text-lg font-semibold">JSON 입력</h2>
         <Button onClick={handleAdd} size="sm">
           <Plus className="size-4 mr-1" />
@@ -36,8 +38,7 @@ export function JsonInputArea() {
                 JSON 객체를 추가해주세요
               </p>
               <Button onClick={handleAdd} size="sm">
-                <Plus className="size-4 mr-1" />
-                첫 번째 JSON 추가
+                <Plus className="size-4 mr-1" />첫 번째 JSON 추가
               </Button>
             </div>
           ) : (
@@ -56,4 +57,3 @@ export function JsonInputArea() {
     </div>
   );
 }
-
