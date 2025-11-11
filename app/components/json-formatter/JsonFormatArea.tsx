@@ -3,12 +3,13 @@
 import { JsonInputCard } from "./JsonInputCard";
 import { JsonTreeView } from "./JsonTreeView";
 import { JsonSearchBar } from "./JsonSearchBar";
+import { CopyButton } from "./CopyButton";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 import type { JsonInput, SearchResult } from "@/lib/types/jsonFormatter";
 
 interface JsonFormatAreaProps {
   jsonObject: JsonInput;
-  searchMode: 'global' | 'individual';
+  searchMode: "global" | "individual";
   globalSearchResults?: SearchResult[];
 }
 
@@ -34,12 +35,12 @@ export function JsonFormatArea({
 
   // 검색 결과 결정: 개별 검색 모드면 individualSearchResults, 전체 검색 모드면 globalSearchResults
   const searchResults =
-    searchMode === 'individual'
+    searchMode === "individual"
       ? individualSearchResults[jsonObject.id] || []
       : globalSearchResults;
 
   return (
-    <div className="flex flex-row gap-6 w-full" style={{ minHeight: '256px' }}>
+    <div className="flex flex-row gap-6 w-full" style={{ minHeight: "256px" }}>
       {/* 좌측: JSON 입력 영역 */}
       <div style={{ minWidth: "200px", maxWidth: "40vw", width: "40%" }}>
         <div className="h-full flex flex-col">
@@ -55,20 +56,30 @@ export function JsonFormatArea({
       <div style={{ minWidth: "400px", maxWidth: "60vw", width: "60%" }}>
         <div className="h-full w-full flex flex-col">
           {/* 개별 검색 모드일 때만 검색바 표시 */}
-          {searchMode === 'individual' && (
+          {searchMode === "individual" && (
             <div className="flex mb-4 gap-4 h-12 items-center justify-between">
               <h2 className="text-lg font-semibold shrink-0">JSON 결과</h2>
-              <div className="w-[60%]">
-                <JsonSearchBar inputId={jsonObject.id} />
+              <div className="flex items-center gap-2 flex-1 justify-end">
+                <div className="w-[60%]">
+                  <JsonSearchBar inputId={jsonObject.id} />
+                </div>
+                <CopyButton
+                  data={jsonObject.parsedData}
+                  error={jsonObject.error}
+                />
               </div>
             </div>
           )}
-          {searchMode === 'global' && (
-            <div className="flex mb-4 gap-4 h-12 items-center">
+          {searchMode === "global" && (
+            <div className="flex mb-4 gap-4 h-12 items-center justify-between">
               <h2 className="text-lg font-semibold shrink-0">JSON 결과</h2>
+              <CopyButton
+                data={jsonObject.parsedData}
+                error={jsonObject.error}
+              />
             </div>
           )}
-          <div className="flex-1" style={{ minHeight: '200px' }}>
+          <div className="flex-1" style={{ minHeight: "200px" }}>
             <JsonTreeView
               inputId={jsonObject.id}
               data={jsonObject.parsedData}
@@ -81,4 +92,3 @@ export function JsonFormatArea({
     </div>
   );
 }
-
