@@ -14,6 +14,7 @@ interface JsonTreeNodeProps {
   searchResults?: SearchResult[];
   inputId?: string;
   pathsToExpand?: Set<string>;
+  indentDepth?: number;
 }
 
 function formatValue(value: unknown): string {
@@ -46,11 +47,12 @@ export function JsonTreeNode({
   searchResults = [],
   inputId = "",
   pathsToExpand = new Set(),
+  indentDepth = 2,
 }: JsonTreeNodeProps) {
   const valueType = getValueType(value);
   const isExpandable = valueType === "object" || valueType === "array";
-  // 뎁스당 스페이스 2개로 들여쓰기
-  const indentSpaces = "  ".repeat(depth);
+  // 뎁스당 스페이스로 들여쓰기
+  const indentSpaces = " ".repeat(depth * indentDepth);
 
   // 검색 결과에서 현재 경로에 해당하는 결과 찾기
   const currentSearchResult = searchResults.find(
@@ -145,12 +147,13 @@ export function JsonTreeNode({
                 key={key}
                 keyName={key}
                 value={val}
-                depth={depth + 2}
+                depth={depth + 1}
                 path={childPath}
                 highlightedPaths={highlightedPaths}
                 searchResults={searchResults}
                 inputId={inputId}
                 pathsToExpand={pathsToExpand}
+                indentDepth={indentDepth}
               />
             );
           })}
@@ -168,12 +171,13 @@ export function JsonTreeNode({
                 key={index}
                 keyName={index}
                 value={item}
-                depth={depth + 2}
+                depth={depth + 1}
                 path={childPath}
                 highlightedPaths={highlightedPaths}
                 searchResults={searchResults}
                 inputId={inputId}
                 pathsToExpand={pathsToExpand}
+                indentDepth={indentDepth}
               />
             );
           })}

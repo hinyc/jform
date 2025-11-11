@@ -2,6 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { JsonSearchBar } from "./JsonSearchBar";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 
@@ -9,9 +10,22 @@ export function JsonFormatterHeader() {
   const addJsonObject = useJsonFormatterStore((state) => state.addJsonObject);
   const searchMode = useJsonFormatterStore((state) => state.searchMode);
   const setSearchMode = useJsonFormatterStore((state) => state.setSearchMode);
+  const indentDepth = useJsonFormatterStore((state) => state.indentDepth);
+  const setIndentDepth = useJsonFormatterStore((state) => state.setIndentDepth);
 
   const handleAdd = () => {
     addJsonObject("");
+  };
+
+  const handleIndentDepthChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "") {
+      return;
+    }
+    const numValue = parseInt(value, 10);
+    if (!isNaN(numValue)) {
+      setIndentDepth(numValue);
+    }
   };
 
   return (
@@ -22,6 +36,19 @@ export function JsonFormatterHeader() {
             <Plus className="size-4 mr-1" />
             추가
           </Button>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600 dark:text-gray-400">
+              들여쓰기:
+            </span>
+            <Input
+              type="number"
+              min="1"
+              max="8"
+              value={indentDepth}
+              onChange={handleIndentDepthChange}
+              className="w-16 h-8 text-center"
+            />
+          </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">
               검색 모드:
@@ -60,4 +87,3 @@ export function JsonFormatterHeader() {
     </div>
   );
 }
-

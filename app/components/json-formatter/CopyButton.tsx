@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 
 interface CopyButtonProps {
   data: unknown;
@@ -11,15 +12,15 @@ interface CopyButtonProps {
 
 /**
  * JSON 데이터를 모두 펼쳐진 상태로 포맷팅하는 함수
- * 들여쓰기 2칸을 유지하여 포맷팅
+ * 들여쓰기를 유지하여 포맷팅
  */
-function formatJsonForCopy(data: unknown): string {
+function formatJsonForCopy(data: unknown, indentDepth: number): string {
   if (data === null || data === undefined) {
     return "null";
   }
 
   try {
-    return JSON.stringify(data, null, 2);
+    return JSON.stringify(data, null, indentDepth);
   } catch (error) {
     console.error("JSON stringify error:", error);
     return String(data);
@@ -28,6 +29,7 @@ function formatJsonForCopy(data: unknown): string {
 
 export function CopyButton({ data, error }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
+  const indentDepth = useJsonFormatterStore((state) => state.indentDepth);
 
   const handleCopy = async () => {
     if (error || !data) {
@@ -36,7 +38,7 @@ export function CopyButton({ data, error }: CopyButtonProps) {
     }
 
     try {
-      const formattedJson = formatJsonForCopy(data);
+      const formattedJson = formatJsonForCopy(data, indentDepth);
       await navigator.clipboard.writeText(formattedJson);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);

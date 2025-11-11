@@ -7,6 +7,7 @@ interface JsonFormatterState {
   searchResults: SearchResult[];
   searchMode: "global" | "individual";
   individualSearchResults: Record<string, SearchResult[]>;
+  indentDepth: number;
 
   addJsonObject: (rawText: string) => void;
   removeJsonObject: (id: string) => void;
@@ -17,6 +18,7 @@ interface JsonFormatterState {
   setSearchMode: (mode: "global" | "individual") => void;
   performIndividualSearch: (inputId: string, query: string) => void;
   clearIndividualSearch: (inputId: string) => void;
+  setIndentDepth: (depth: number) => void;
 }
 
 export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
@@ -25,6 +27,7 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
   searchResults: [],
   searchMode: "global",
   individualSearchResults: {},
+  indentDepth: 2,
 
   addJsonObject: (rawText: string) => {
     const id = crypto.randomUUID();
@@ -285,5 +288,11 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
       delete newIndividualResults[inputId];
       return { individualSearchResults: newIndividualResults };
     });
+  },
+
+  setIndentDepth: (depth: number) => {
+    // 1 이상 8 이하의 값만 허용
+    const validDepth = Math.max(1, Math.min(8, Math.floor(depth)));
+    set({ indentDepth: validDepth });
   },
 }));

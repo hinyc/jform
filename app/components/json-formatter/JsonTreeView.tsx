@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { JsonTreeNode } from "./JsonTreeNode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 import type { SearchResult } from "@/lib/types/jsonFormatter";
 
 interface JsonTreeViewProps {
@@ -49,6 +50,7 @@ export function JsonTreeView({
   error,
   searchResults,
 }: JsonTreeViewProps) {
+  const indentDepth = useJsonFormatterStore((state) => state.indentDepth);
   const relevantResults = searchResults.filter(
     (result) => result.inputId === inputId
   );
@@ -111,6 +113,7 @@ export function JsonTreeView({
               searchResults={relevantResults}
               inputId={inputId}
               pathsToExpand={pathsToExpand}
+              indentDepth={indentDepth}
             />
           </div>
         </ScrollArea>
