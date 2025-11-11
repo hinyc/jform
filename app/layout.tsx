@@ -31,7 +31,7 @@ export default function RootLayout({
         <div className="fixed top-0 left-0 right-0 z-50">
           <Navigation />
         </div>
-        <div className="h-100vh mt-18 overflow-hidden">{children}</div>
+        <div className="min-h-screen">{children}</div>
       </body>
     </html>
   );

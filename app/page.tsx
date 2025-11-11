@@ -28,7 +28,7 @@ export default function Home() {
   }, [addJsonObject, jsonObjects.length]);
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 font-sans dark:bg-black">
+    <div className="flex min-h-screen bg-zinc-50 font-sans dark:bg-black pt-18">
       <main className="flex w-full flex-col gap-6 p-6">
         {/* 헤더 영역: 추가 버튼, 검색 모드 토글, 전체 검색바 */}
         <JsonFormatterHeader />

@@ -70,12 +70,12 @@ export function JsonInputCard({
           </Button>
         )}
       </CardHeader>
-      <CardContent className="flex-1 p-4 pt-0 overflow-hidden">
+      <CardContent className="flex-1 p-4 pt-1 overflow-hidden">
         <textarea
           value={localValue}
           onChange={(e) => handleChange(e.target.value)}
           placeholder='예: { "name": "John", "age": 30 }'
-          className="w-full h-full resize-none border rounded-md p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 overflow-x-auto"
+          className="w-full h-full resize-none border rounded-md p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 overflow-x-auto"
         />
       </CardContent>
     </Card>

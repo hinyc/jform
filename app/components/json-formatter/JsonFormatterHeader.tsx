@@ -29,7 +29,7 @@ export function JsonFormatterHeader() {
   };
 
   return (
-    <div className="sticky top-0 z-10 bg-zinc-50 dark:bg-black pb-4 pt-6 -mt-6 -mx-6 px-6 border-b border-gray-200 dark:border-gray-800">
+    <div className="sticky top-18 z-40 bg-zinc-50 dark:bg-black pb-4 pt-6 -mt-6 -mx-6 px-6 border-b border-gray-200 dark:border-gray-800">
       <div className="flex items-center justify-between gap-4">
         <div className="flex items-center gap-4">
           <Button onClick={handleAdd} size="sm">
