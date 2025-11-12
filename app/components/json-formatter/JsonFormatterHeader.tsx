@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { JsonSearchBar } from "./JsonSearchBar";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
+import { useI18nStore } from "@/lib/stores/i18nStore";
+import { t } from "@/lib/i18n";
 
 export function JsonFormatterHeader() {
   const addJsonObject = useJsonFormatterStore((state) => state.addJsonObject);
@@ -12,6 +14,7 @@ export function JsonFormatterHeader() {
   const setSearchMode = useJsonFormatterStore((state) => state.setSearchMode);
   const indentDepth = useJsonFormatterStore((state) => state.indentDepth);
   const setIndentDepth = useJsonFormatterStore((state) => state.setIndentDepth);
+  const language = useI18nStore((state) => state.language);
 
   const handleAdd = () => {
     addJsonObject("");
@@ -34,11 +37,11 @@ export function JsonFormatterHeader() {
         <div className="flex items-center gap-4">
           <Button onClick={handleAdd} size="sm">
             <Plus className="size-4 mr-1" />
-            추가
+            {t("common.add", language)}
           </Button>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              들여쓰기:
+              {t("jsonFormatter.header.indentDepth", language)}
             </span>
             <Input
               type="number"
@@ -51,7 +54,7 @@ export function JsonFormatterHeader() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">
-              검색 모드:
+              {t("jsonFormatter.header.searchMode", language)}
             </span>
             <div className="flex gap-1 border rounded-md p-1">
               <Button
@@ -60,7 +63,7 @@ export function JsonFormatterHeader() {
                 onClick={() => setSearchMode("global")}
                 className="h-7 px-3"
               >
-                전체검색
+                {t("jsonFormatter.header.globalSearch", language)}
               </Button>
               <Button
                 variant={searchMode === "individual" ? "default" : "ghost"}
@@ -68,7 +71,7 @@ export function JsonFormatterHeader() {
                 onClick={() => setSearchMode("individual")}
                 className="h-7 px-3"
               >
-                개별검색
+                {t("jsonFormatter.header.individualSearch", language)}
               </Button>
             </div>
           </div>

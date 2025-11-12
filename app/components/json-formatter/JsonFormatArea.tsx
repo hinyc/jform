@@ -6,6 +6,8 @@ import { JsonSearchBar } from "./JsonSearchBar";
 import { CopyButton } from "./CopyButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
+import { useI18nStore } from "@/lib/stores/i18nStore";
+import { t } from "@/lib/i18n";
 import type { JsonInput, SearchResult } from "@/lib/types/jsonFormatter";
 
 interface JsonFormatAreaProps {
@@ -26,6 +28,7 @@ export function JsonFormatArea({
   const individualSearchResults = useJsonFormatterStore(
     (state) => state.individualSearchResults
   );
+  const language = useI18nStore((state) => state.language);
 
   const handleRemove = () => {
     removeJsonObject(jsonObject.id);
@@ -61,7 +64,9 @@ export function JsonFormatArea({
               {/* 개별 검색 모드일 때만 검색바 표시 */}
               {searchMode === "individual" && (
                 <div className="flex mb-4 gap-4 h-12 items-center justify-between">
-                  <h2 className="text-lg font-semibold shrink-0">JSON 결과</h2>
+                  <h2 className="text-lg font-semibold shrink-0">
+                    {t("jsonFormatter.formatArea.resultTitle", language)}
+                  </h2>
                   <div className="flex items-center gap-2 flex-1 justify-end">
                     <div className="w-[60%]">
                       <JsonSearchBar inputId={jsonObject.id} />
@@ -75,7 +80,9 @@ export function JsonFormatArea({
               )}
               {searchMode === "global" && (
                 <div className="flex mb-4 gap-4 h-12 items-center justify-between">
-                  <h2 className="text-lg font-semibold shrink-0">JSON 결과</h2>
+                  <h2 className="text-lg font-semibold shrink-0">
+                    {t("jsonFormatter.formatArea.resultTitle", language)}
+                  </h2>
                   <CopyButton
                     data={jsonObject.parsedData}
                     error={jsonObject.error}

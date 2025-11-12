@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from "react";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useI18nStore } from "@/lib/stores/i18nStore";
+import { t } from "@/lib/i18n";
 import type { SearchResult } from "@/lib/types/jsonFormatter";
 
 interface JsonTreeNodeProps {
@@ -53,6 +55,7 @@ export function JsonTreeNode({
   const isExpandable = valueType === "object" || valueType === "array";
   // 뎁스당 스페이스로 들여쓰기
   const indentSpaces = " ".repeat(depth * indentDepth);
+  const language = useI18nStore((state) => state.language);
 
   // 검색 결과에서 현재 경로에 해당하는 결과 찾기
   const currentSearchResult = searchResults.find(
@@ -224,7 +227,7 @@ export function JsonTreeNode({
         <button
           onClick={toggleExpand}
           className="shrink-0 mt-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-0.5 transition-colors"
-          aria-label="Expand"
+          aria-label={t("jsonFormatter.treeNode.expand", language)}
         >
           <ChevronRight className="size-4 text-gray-600 dark:text-gray-400" />
         </button>
@@ -261,7 +264,7 @@ export function JsonTreeNode({
         <button
           onClick={toggleExpand}
           className="shrink-0 mt-0.5 hover:bg-gray-100 dark:hover:bg-gray-800 rounded p-0.5 transition-colors"
-          aria-label="Collapse"
+          aria-label={t("jsonFormatter.treeNode.collapse", language)}
         >
           <ChevronDown className="size-4 text-gray-600 dark:text-gray-400" />
         </button>

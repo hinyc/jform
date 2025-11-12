@@ -1,0 +1,50 @@
+{
+  "common": {
+    "add": "추가",
+    "copy": "복사",
+    "copied": "복사됨",
+    "share": "공유",
+    "search": "검색"
+  },
+  "languages": {
+    "ko": "한국어",
+    "en": "English"
+  },
+  "jsonFormatter": {
+    "header": {
+      "indentDepth": "들여쓰기:",
+      "searchMode": "검색 모드:",
+      "globalSearch": "전체검색",
+      "individualSearch": "개별검색"
+    },
+    "inputCard": {
+      "title": "JSON Input",
+      "placeholder": "예: { \"name\": \"John\", \"age\": 30 }"
+    },
+    "formatArea": {
+      "resultTitle": "JSON 결과"
+    },
+    "searchBar": {
+      "placeholder": "키나 값을 검색하세요...",
+      "resultsFound": "개의 결과를 찾았습니다",
+      "noResults": "검색 결과가 없습니다"
+    },
+    "copyButton": {
+      "noValidJson": "복사할 수 있는 유효한 JSON이 없습니다.",
+      "copyFailed": "복사에 실패했습니다."
+    },
+    "shareButton": {
+      "noJsonObjects": "공유할 JSON 객체가 없습니다.",
+      "urlCopyFailed": "URL 복사에 실패했습니다."
+    },
+    "treeNode": {
+      "expand": "Expand",
+      "collapse": "Collapse"
+    },
+    "treeView": {
+      "parseError": "JSON 파싱 오류",
+      "enterValidJson": "유효한 JSON을 입력해주세요"
+    }
+  }
+}
+

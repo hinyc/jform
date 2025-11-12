@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "./components/Navigation";
+import { LanguageInitializer } from "./components/LanguageInitializer";
 import { metadata } from "@/lib/metadata";
 import { jsonLdSchema } from "@/lib/jsonLd";
 
@@ -22,10 +23,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko">
+    <html lang="en" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <LanguageInitializer />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{

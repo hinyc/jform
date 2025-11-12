@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { ShareButton } from "./json-formatter/ShareButton";
+import { LanguageSelector } from "./LanguageSelector";
 
 /**
  * height: 72px;
@@ -19,7 +20,10 @@ export default function Navigation() {
           className="w-auto h-10"
         />
       </Link>
-      <ShareButton />
+      <div className="flex items-center gap-2">
+        <ShareButton />
+        <LanguageSelector />
+      </div>
     </nav>
   );
 }

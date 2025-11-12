@@ -5,6 +5,8 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
+import { useI18nStore } from "@/lib/stores/i18nStore";
+import { t } from "@/lib/i18n";
 
 interface JsonSearchBarProps {
   inputId?: string;
@@ -26,6 +28,7 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
   const individualSearchResults = useJsonFormatterStore(
     (state) => state.individualSearchResults
   );
+  const language = useI18nStore((state) => state.language);
 
   // 개별 검색 모드면 해당 inputId의 검색 결과를 사용, 아니면 전체 검색 결과 사용
   const currentSearchResults = inputId
@@ -86,7 +89,7 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 size-4 text-gray-400" />
           <Input
             type="text"
-            placeholder="키나 값을 검색하세요..."
+            placeholder={t("jsonFormatter.searchBar.placeholder", language)}
             value={localQuery}
             onChange={(e) => setLocalQuery(e.target.value)}
             onKeyDown={handleKeyPress}
@@ -104,14 +107,16 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
           )}
         </div>
         <Button onClick={handleSearch} size="default" disabled={disabled}>
-          검색
+          {t("common.search", language)}
         </Button>
       </div>
       {hasSearched && localQuery.trim() && (
         <div className="text-sm text-gray-600 dark:text-gray-400">
           {currentSearchResults.length > 0
-            ? `${currentSearchResults.length}개의 결과를 찾았습니다`
-            : "검색 결과가 없습니다"}
+            ? language === "ko"
+              ? `${currentSearchResults.length}${t("jsonFormatter.searchBar.resultsFound", language)}`
+              : `${currentSearchResults.length} ${t("jsonFormatter.searchBar.resultsFound", language)}`
+            : t("jsonFormatter.searchBar.noResults", language)}
         </div>
       )}
     </div>

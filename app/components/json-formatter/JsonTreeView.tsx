@@ -5,6 +5,8 @@ import { JsonTreeNode } from "./JsonTreeNode";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
+import { useI18nStore } from "@/lib/stores/i18nStore";
+import { t } from "@/lib/i18n";
 import type { SearchResult } from "@/lib/types/jsonFormatter";
 
 interface JsonTreeViewProps {
@@ -51,6 +53,7 @@ export function JsonTreeView({
   searchResults,
 }: JsonTreeViewProps) {
   const indentDepth = useJsonFormatterStore((state) => state.indentDepth);
+  const language = useI18nStore((state) => state.language);
   const relevantResults = searchResults.filter(
     (result) => result.inputId === inputId
   );
@@ -76,7 +79,9 @@ export function JsonTreeView({
     return (
       <Card className="h-full">
         <CardHeader>
-          <CardTitle className="text-sm">JSON Parse Error</CardTitle>
+          <CardTitle className="text-sm">
+            {t("jsonFormatter.treeView.parseError", language)}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <p className="text-sm text-red-600 dark:text-red-400 font-mono">
@@ -92,7 +97,7 @@ export function JsonTreeView({
       <Card className="h-full">
         <CardContent className="flex items-center justify-center h-full py-8">
           <p className="text-sm text-gray-500 dark:text-gray-400">
-            유효한 JSON을 입력해주세요
+            {t("jsonFormatter.treeView.enterValidJson", language)}
           </p>
         </CardContent>
       </Card>

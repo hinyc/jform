@@ -5,6 +5,8 @@ import { Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
+import { useI18nStore } from "@/lib/stores/i18nStore";
+import { t } from "@/lib/i18n";
 
 interface JsonInputCardProps {
   id: string;
@@ -23,6 +25,7 @@ export function JsonInputCard({
   );
   const prevInitialValueRef = useRef(initialValue);
   const isUserEditingRef = useRef(false);
+  const language = useI18nStore((state) => state.language);
 
   // initialValue가 변경되었을 때만 로컬 상태 동기화 (사용자가 편집 중이 아닐 때만)
   // 외부 prop 변경 시 내부 상태 동기화는 정당한 사용 사례입니다
@@ -58,7 +61,9 @@ export function JsonInputCard({
   return (
     <Card className="h-full flex flex-col">
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium">JSON Input</CardTitle>
+        <CardTitle className="text-sm font-medium">
+          {t("jsonFormatter.inputCard.title", language)}
+        </CardTitle>
         {onRemove && (
           <Button
             variant="ghost"
@@ -74,7 +79,7 @@ export function JsonInputCard({
         <textarea
           value={localValue}
           onChange={(e) => handleChange(e.target.value)}
-          placeholder='예: { "name": "John", "age": 30 }'
+          placeholder={t("jsonFormatter.inputCard.placeholder", language)}
           className="w-full h-full resize-none border rounded-md p-3 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 overflow-x-auto"
         />
       </CardContent>

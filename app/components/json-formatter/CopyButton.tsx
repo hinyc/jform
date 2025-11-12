@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
+import { useI18nStore } from "@/lib/stores/i18nStore";
+import { t } from "@/lib/i18n";
 
 interface CopyButtonProps {
   data: unknown;
@@ -30,10 +32,11 @@ function formatJsonForCopy(data: unknown, indentDepth: number): string {
 export function CopyButton({ data, error }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const indentDepth = useJsonFormatterStore((state) => state.indentDepth);
+  const language = useI18nStore((state) => state.language);
 
   const handleCopy = async () => {
     if (error || !data) {
-      alert("복사할 수 있는 유효한 JSON이 없습니다.");
+      alert(t("jsonFormatter.copyButton.noValidJson", language));
       return;
     }
 
@@ -44,7 +47,7 @@ export function CopyButton({ data, error }: CopyButtonProps) {
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error("Failed to copy:", error);
-      alert("복사에 실패했습니다.");
+      alert(t("jsonFormatter.copyButton.copyFailed", language));
     }
   };
 
@@ -59,12 +62,12 @@ export function CopyButton({ data, error }: CopyButtonProps) {
       {copied ? (
         <>
           <Check className="size-4" />
-          복사됨
+          {t("common.copied", language)}
         </>
       ) : (
         <>
           <Copy className="size-4" />
-          복사
+          {t("common.copy", language)}
         </>
       )}
     </Button>

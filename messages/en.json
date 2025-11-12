@@ -1,0 +1,49 @@
+{
+  "common": {
+    "add": "Add",
+    "copy": "Copy",
+    "copied": "Copied",
+    "share": "Share",
+    "search": "Search"
+  },
+  "languages": {
+    "ko": "한국어",
+    "en": "English"
+  },
+  "jsonFormatter": {
+    "header": {
+      "indentDepth": "Indent:",
+      "searchMode": "Search Mode:",
+      "globalSearch": "Global Search",
+      "individualSearch": "Individual Search"
+    },
+    "inputCard": {
+      "title": "JSON Input",
+      "placeholder": "e.g., { \"name\": \"John\", \"age\": 30 }"
+    },
+    "formatArea": {
+      "resultTitle": "JSON Result"
+    },
+    "searchBar": {
+      "placeholder": "Search for keys or values...",
+      "resultsFound": "results found",
+      "noResults": "No results found"
+    },
+    "copyButton": {
+      "noValidJson": "No valid JSON to copy.",
+      "copyFailed": "Failed to copy."
+    },
+    "shareButton": {
+      "noJsonObjects": "No JSON objects to share.",
+      "urlCopyFailed": "Failed to copy URL."
+    },
+    "treeNode": {
+      "expand": "Expand",
+      "collapse": "Collapse"
+    },
+    "treeView": {
+      "parseError": "JSON Parse Error",
+      "enterValidJson": "Please enter valid JSON"
+    }
+  }
+}

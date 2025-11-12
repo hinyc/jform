@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { Share2, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useJsonFormatterStore } from '@/lib/stores/jsonFormatterStore';
+import { useI18nStore } from '@/lib/stores/i18nStore';
+import { t } from '@/lib/i18n';
 
 function encodeJsonToUrl(jsonObjects: Array<{ rawText: string }>): string {
   try {
@@ -31,10 +33,11 @@ function decodeJsonFromUrl(encoded: string): string[] {
 export function ShareButton() {
   const [copied, setCopied] = useState(false);
   const jsonObjects = useJsonFormatterStore((state) => state.jsonObjects);
+  const language = useI18nStore((state) => state.language);
 
   const handleShare = async () => {
     if (jsonObjects.length === 0) {
-      alert('공유할 JSON 객체가 없습니다.');
+      alert(t('jsonFormatter.shareButton.noJsonObjects', language));
       return;
     }
 
@@ -47,7 +50,7 @@ export function ShareButton() {
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy:', error);
-      alert('URL 복사에 실패했습니다.');
+      alert(t('jsonFormatter.shareButton.urlCopyFailed', language));
     }
   };
 
@@ -56,12 +59,12 @@ export function ShareButton() {
       {copied ? (
         <>
           <Check className="size-4 mr-1" />
-          복사됨
+          {t('common.copied', language)}
         </>
       ) : (
         <>
           <Share2 className="size-4 mr-1" />
-          공유
+          {t('common.share', language)}
         </>
       )}
     </Button>
