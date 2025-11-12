@@ -1,7 +1,10 @@
-import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navigation from "./components/Navigation";
+import { metadata } from "@/lib/metadata";
+import { jsonLdSchema } from "@/lib/jsonLd";
+
+export { metadata };
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,21 +16,22 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "JForm",
-  description: "The Best, Most Powerful, and Most Convenient JSON Formatter.",
-};
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="ko">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(jsonLdSchema),
+          }}
+        />
         <div className="fixed top-0 left-0 right-0 z-50">
           <Navigation />
         </div>
