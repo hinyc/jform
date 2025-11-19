@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { JSX, useEffect, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
@@ -21,7 +21,7 @@ function highlightTypeScript(code: string): JSX.Element[] {
 
   lines.forEach((line, lineIndex) => {
     const lineTokens: JSX.Element[] = [];
-    let remaining = line;
+    const remaining = line;
 
     // 주석 처리
     const commentIndex = remaining.indexOf("//");
@@ -29,12 +29,19 @@ function highlightTypeScript(code: string): JSX.Element[] {
       const beforeComment = remaining.substring(0, commentIndex);
       const comment = remaining.substring(commentIndex);
       if (beforeComment.trim()) {
-        const beforeTokens = tokenizeCode(beforeComment, lineIndex, globalTokenIndex);
+        const beforeTokens = tokenizeCode(
+          beforeComment,
+          lineIndex,
+          globalTokenIndex
+        );
         globalTokenIndex += beforeTokens.length;
         lineTokens.push(...beforeTokens);
       }
       lineTokens.push(
-        <span key={`${lineIndex}-comment-${globalTokenIndex++}`} className={getTokenClassName("comment")}>
+        <span
+          key={`${lineIndex}-comment-${globalTokenIndex++}`}
+          className={getTokenClassName("comment")}
+        >
           {comment}
         </span>
       );
@@ -61,7 +68,11 @@ function highlightTypeScript(code: string): JSX.Element[] {
 /**
  * 코드 라인을 토큰으로 분리
  */
-function tokenizeCode(line: string, lineIndex: number, startTokenIndex: number): JSX.Element[] {
+function tokenizeCode(
+  line: string,
+  lineIndex: number,
+  startTokenIndex: number
+): JSX.Element[] {
   const tokens: JSX.Element[] = [];
   let remaining = line;
   let tokenIndex = startTokenIndex;
@@ -69,7 +80,8 @@ function tokenizeCode(line: string, lineIndex: number, startTokenIndex: number):
   // 키워드: interface, type
   const keywordRegex = /\b(interface|type)\b/;
   // 기본 타입
-  const primitiveRegex = /\b(string|number|boolean|null|undefined|unknown|never|void|any)\b/;
+  const primitiveRegex =
+    /\b(string|number|boolean|null|undefined|unknown|never|void|any)\b/;
   // 연산자
   const operatorRegex = /([|:;{}[\]()])/;
 
@@ -81,7 +93,11 @@ function tokenizeCode(line: string, lineIndex: number, startTokenIndex: number):
 
     // 키워드 체크
     const keywordMatch = remaining.match(keywordRegex);
-    if (keywordMatch && keywordMatch.index !== undefined && keywordMatch.index < minIndex) {
+    if (
+      keywordMatch &&
+      keywordMatch.index !== undefined &&
+      keywordMatch.index < minIndex
+    ) {
       minIndex = keywordMatch.index;
       matchType = "keyword";
       matchText = keywordMatch[0];
@@ -90,7 +106,11 @@ function tokenizeCode(line: string, lineIndex: number, startTokenIndex: number):
 
     // 기본 타입 체크
     const primitiveMatch = remaining.match(primitiveRegex);
-    if (primitiveMatch && primitiveMatch.index !== undefined && primitiveMatch.index < minIndex) {
+    if (
+      primitiveMatch &&
+      primitiveMatch.index !== undefined &&
+      primitiveMatch.index < minIndex
+    ) {
       minIndex = primitiveMatch.index;
       matchType = "primitive";
       matchText = primitiveMatch[0];
@@ -99,7 +119,11 @@ function tokenizeCode(line: string, lineIndex: number, startTokenIndex: number):
 
     // 연산자 체크
     const operatorMatch = remaining.match(operatorRegex);
-    if (operatorMatch && operatorMatch.index !== undefined && operatorMatch.index < minIndex) {
+    if (
+      operatorMatch &&
+      operatorMatch.index !== undefined &&
+      operatorMatch.index < minIndex
+    ) {
       minIndex = operatorMatch.index;
       matchType = "operator";
       matchText = operatorMatch[0];
@@ -110,14 +134,22 @@ function tokenizeCode(line: string, lineIndex: number, startTokenIndex: number):
       // 매치 전의 텍스트 처리
       if (minIndex > 0) {
         const beforeText = remaining.substring(0, minIndex);
-        const beforeTokens = parseTextSegment(beforeText, line, lineIndex, tokenIndex);
+        const beforeTokens = parseTextSegment(
+          beforeText,
+          line,
+          lineIndex,
+          tokenIndex
+        );
         tokenIndex += beforeTokens.length;
         tokens.push(...beforeTokens);
       }
 
       // 매치된 토큰 추가
       tokens.push(
-        <span key={`${lineIndex}-${matchType}-${tokenIndex++}`} className={getTokenClassName(matchType)}>
+        <span
+          key={`${lineIndex}-${matchType}-${tokenIndex++}`}
+          className={getTokenClassName(matchType)}
+        >
           {matchText}
         </span>
       );
@@ -125,7 +157,12 @@ function tokenizeCode(line: string, lineIndex: number, startTokenIndex: number):
       remaining = remaining.substring(minIndex + matchText.length);
     } else {
       // 남은 텍스트 처리
-      const remainingTokens = parseTextSegment(remaining, line, lineIndex, tokenIndex);
+      const remainingTokens = parseTextSegment(
+        remaining,
+        line,
+        lineIndex,
+        tokenIndex
+      );
       tokens.push(...remainingTokens);
       break;
     }
@@ -137,10 +174,15 @@ function tokenizeCode(line: string, lineIndex: number, startTokenIndex: number):
 /**
  * 텍스트 세그먼트를 파싱 (속성명, 타입명 등)
  */
-function parseTextSegment(text: string, fullLine: string, lineIndex: number, startTokenIndex: number): JSX.Element[] {
+function parseTextSegment(
+  text: string,
+  fullLine: string,
+  lineIndex: number,
+  startTokenIndex: number
+): JSX.Element[] {
   const tokens: JSX.Element[] = [];
   let tokenIndex = startTokenIndex;
-  
+
   if (!text.trim()) {
     tokens.push(<span key={`${lineIndex}-text-${tokenIndex++}`}>{text}</span>);
     return tokens;
@@ -148,36 +190,60 @@ function parseTextSegment(text: string, fullLine: string, lineIndex: number, sta
 
   // 라인에서 속성명과 타입을 구분
   // 예: "  name: string;" -> 속성명: name, 타입: string
-  const propertyMatch = fullLine.match(/^\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:\s*(.+?)\s*;?\s*$/);
-  
+  const propertyMatch = fullLine.match(
+    /^\s*([a-zA-Z_$][a-zA-Z0-9_$]*)\s*:\s*(.+?)\s*;?\s*$/
+  );
+
   if (propertyMatch) {
     // 속성명 부분
     const propertyName = propertyMatch[1];
-    const propertyNameIndex = text.indexOf(propertyName);
-    
-    if (propertyNameIndex !== -1) {
+    // text의 시작 부분(공백 제외)에 속성명이 있는지 확인
+    const trimmedText = text.trimStart();
+    const startsWithProperty = trimmedText.startsWith(propertyName);
+
+    // 속성명이 text의 시작 부분에 있고, 그 뒤에 단어 경계가 있는지 확인
+    // (예: "DV"를 찾을 때 "IDV"의 일부가 아닌지 확인)
+    const propertyRegex = new RegExp(`^\\s*(${propertyName})\\b`);
+    const isActualProperty = propertyRegex.test(text);
+
+    if (isActualProperty && startsWithProperty) {
+      const propertyNameIndex = text.indexOf(propertyName);
+
       // 속성명 전의 공백/들여쓰기
       if (propertyNameIndex > 0) {
-        tokens.push(<span key={`${lineIndex}-text-${tokenIndex++}`}>{text.substring(0, propertyNameIndex)}</span>);
+        tokens.push(
+          <span key={`${lineIndex}-text-${tokenIndex++}`}>
+            {text.substring(0, propertyNameIndex)}
+          </span>
+        );
       }
-      
+
       // 속성명
       tokens.push(
-        <span key={`${lineIndex}-property-${tokenIndex++}`} className={getTokenClassName("property")}>
+        <span
+          key={`${lineIndex}-property-${tokenIndex++}`}
+          className={getTokenClassName("property")}
+        >
           {propertyName}
         </span>
       );
-      
+
       // 속성명 이후의 텍스트 (콜론, 타입 등)
-      const afterProperty = text.substring(propertyNameIndex + propertyName.length);
+      const afterProperty = text.substring(
+        propertyNameIndex + propertyName.length
+      );
       if (afterProperty) {
         // 타입 부분 파싱
-        const typeTokens = parseTypeExpression(afterProperty, lineIndex, tokenIndex);
+        const typeTokens = parseTypeExpression(
+          afterProperty,
+          lineIndex,
+          tokenIndex
+        );
         tokenIndex += typeTokens.length;
         tokens.push(...typeTokens);
       }
     } else {
-      // 속성명이 텍스트에 없으면 일반 텍스트로 처리
+      // 속성명이 text의 시작 부분에 없으면 타입 영역으로 처리
       const typeTokens = parseTypeExpression(text, lineIndex, tokenIndex);
       tokens.push(...typeTokens);
     }
@@ -193,15 +259,21 @@ function parseTextSegment(text: string, fullLine: string, lineIndex: number, sta
 /**
  * 타입 표현식을 파싱 (타입명, 기본 타입 등)
  */
-function parseTypeExpression(text: string, lineIndex: number, startTokenIndex: number): JSX.Element[] {
+function parseTypeExpression(
+  text: string,
+  lineIndex: number,
+  startTokenIndex: number
+): JSX.Element[] {
   const tokens: JSX.Element[] = [];
   let remaining = text;
   let tokenIndex = startTokenIndex;
-  
+
   // 기본 타입
-  const primitiveRegex = /\b(string|number|boolean|null|undefined|unknown|never|void|any)\b/;
-  // 대문자로 시작하는 타입명
-  const typeNameRegex = /\b([A-Z][a-zA-Z0-9_$]*)\b/;
+  const primitiveRegex =
+    /\b(string|number|boolean|null|undefined|unknown|never|void|any)\b/;
+  // 타입명: I[A-Z]로 시작하는 인터페이스 이름 (예: IDV, ISchedule) 또는 대문자로 시작하는 타입명
+  // I[A-Z] 패턴을 먼저 체크하여 I 단독 매칭 방지
+  const typeNameRegex = /\b(I[A-Z][a-zA-Z0-9_$]*|[A-Z][a-zA-Z0-9_$]+)\b/;
 
   while (remaining.length > 0) {
     let matched = false;
@@ -211,7 +283,11 @@ function parseTypeExpression(text: string, lineIndex: number, startTokenIndex: n
 
     // 기본 타입 체크
     const primitiveMatch = remaining.match(primitiveRegex);
-    if (primitiveMatch && primitiveMatch.index !== undefined && primitiveMatch.index < minIndex) {
+    if (
+      primitiveMatch &&
+      primitiveMatch.index !== undefined &&
+      primitiveMatch.index < minIndex
+    ) {
       minIndex = primitiveMatch.index;
       matchType = "primitive";
       matchText = primitiveMatch[0];
@@ -220,22 +296,33 @@ function parseTypeExpression(text: string, lineIndex: number, startTokenIndex: n
 
     // 타입명 체크
     const typeNameMatch = remaining.match(typeNameRegex);
-    if (typeNameMatch && typeNameMatch.index !== undefined && typeNameMatch.index < minIndex) {
+    if (
+      typeNameMatch &&
+      typeNameMatch.index !== undefined &&
+      typeNameMatch.index < minIndex
+    ) {
       minIndex = typeNameMatch.index;
       matchType = "type";
-      matchText = typeNameMatch[1];
+      matchText = typeNameMatch[0]; // 전체 매치 사용 (I 포함)
       matched = true;
     }
 
     if (matched) {
       // 매치 전의 텍스트
       if (minIndex > 0) {
-        tokens.push(<span key={`${lineIndex}-text-${tokenIndex++}`}>{remaining.substring(0, minIndex)}</span>);
+        tokens.push(
+          <span key={`${lineIndex}-text-${tokenIndex++}`}>
+            {remaining.substring(0, minIndex)}
+          </span>
+        );
       }
 
       // 매치된 토큰
       tokens.push(
-        <span key={`${lineIndex}-${matchType}-${tokenIndex++}`} className={getTokenClassName(matchType)}>
+        <span
+          key={`${lineIndex}-${matchType}-${tokenIndex++}`}
+          className={getTokenClassName(matchType)}
+        >
           {matchText}
         </span>
       );
@@ -243,7 +330,9 @@ function parseTypeExpression(text: string, lineIndex: number, startTokenIndex: n
       remaining = remaining.substring(minIndex + matchText.length);
     } else {
       // 남은 텍스트
-      tokens.push(<span key={`${lineIndex}-text-${tokenIndex++}`}>{remaining}</span>);
+      tokens.push(
+        <span key={`${lineIndex}-text-${tokenIndex++}`}>{remaining}</span>
+      );
       break;
     }
   }
@@ -285,6 +374,12 @@ export function TypeScriptInterfaceView({
   const language = useI18nStore((state) => state.language);
 
   const interfaceData = typescriptInterfaces[inputId];
+
+  // useMemo는 항상 early return 이전에 호출되어야 함
+  const highlightedCode = useMemo(() => {
+    if (!interfaceData?.interfaceString) return null;
+    return highlightTypeScript(interfaceData.interfaceString);
+  }, [interfaceData]);
 
   useEffect(() => {
     // 인터페이스가 없으면 생성
@@ -329,11 +424,6 @@ export function TypeScriptInterfaceView({
     );
   }
 
-  const highlightedCode = useMemo(() => {
-    if (!interfaceData.interfaceString) return null;
-    return highlightTypeScript(interfaceData.interfaceString);
-  }, [interfaceData.interfaceString]);
-
   return (
     <Card className="h-full flex flex-col">
       <CardContent className="flex-1 p-4 overflow-hidden">
@@ -346,4 +436,3 @@ export function TypeScriptInterfaceView({
     </Card>
   );
 }
-

@@ -26,6 +26,7 @@ function sanitizeTypeName(name: string): string {
 
 /**
  * 경로에서 마지막 값만 사용하여 인터페이스 이름 생성 (중복 시 숫자 추가)
+ * 모든 인터페이스 이름 앞에 "I" 접두사 추가
  */
 function generateInterfaceName(
   baseName: string,
@@ -36,17 +37,21 @@ function generateInterfaceName(
   const lastPath = path.length > 0 ? path[path.length - 1] : "";
   const baseInterfaceName = lastPath
     ? sanitizeTypeName(lastPath.replace(/[\[\]]/g, ""))
-    : baseName;
+    : sanitizeTypeName(baseName);
 
-  // 중복 체크 및 숫자 추가
+  // 중복 체크 및 숫자 추가 (I 접두사 없이 체크)
+  let finalName: string;
   if (usedNames.has(baseInterfaceName)) {
     const count = usedNames.get(baseInterfaceName)! + 1;
     usedNames.set(baseInterfaceName, count);
-    return `${baseInterfaceName}${count}`;
+    finalName = `${baseInterfaceName}${count}`;
   } else {
     usedNames.set(baseInterfaceName, 0);
-    return baseInterfaceName;
+    finalName = baseInterfaceName;
   }
+
+  // "I" 접두사 추가
+  return `I${finalName}`;
 }
 
 /**
@@ -174,7 +179,8 @@ export function jsonToInterface(
   rootInterfaceName: string = "Root"
 ): string {
   if (data === null || data === undefined) {
-    return `interface ${rootInterfaceName} {\n  // null or undefined\n}`;
+    const rootInterfaceNameWithI = `I${sanitizeTypeName(rootInterfaceName)}`;
+    return `interface ${rootInterfaceNameWithI} {\n  // null or undefined\n}`;
   }
 
   const typeInfo: TypeInfo = {
@@ -184,13 +190,15 @@ export function jsonToInterface(
   };
 
   const sanitizedName = sanitizeTypeName(rootInterfaceName);
-  // 루트 인터페이스 이름도 usedNames에 추가
+  // 루트 인터페이스 이름도 usedNames에 추가 (I 접두사 없이)
   typeInfo.usedNames.set(sanitizedName, 0);
+  // 루트 인터페이스 이름에 "I" 접두사 추가
+  const rootInterfaceNameWithI = `I${sanitizedName}`;
 
   if (Array.isArray(data)) {
     if (data.length === 0) {
       const itemName = generateInterfaceName("Item", [], typeInfo.usedNames);
-      return `interface ${itemName} {\n  // empty array\n}\n\ntype ${sanitizedName} = ${itemName}[];`;
+      return `interface ${itemName} {\n  // empty array\n}\n\ntype ${rootInterfaceNameWithI} = ${itemName}[];`;
     }
 
     // 배열의 첫 번째 요소로 타입 추론
@@ -211,7 +219,7 @@ export function jsonToInterface(
 
     const itemType = inferType(firstItem, "Item", typeInfo, []);
     const interfaces = Array.from(typeInfo.interfaces.values()).join("\n\n");
-    const mainType = `type ${sanitizedName} = ${itemType}[];`;
+    const mainType = `type ${rootInterfaceNameWithI} = ${itemType}[];`;
 
     return interfaces ? `${interfaces}\n\n${mainType}` : mainType;
   }
@@ -219,7 +227,7 @@ export function jsonToInterface(
   if (typeof data === "object" && data !== null) {
     generateInterface(
       data as Record<string, unknown>,
-      sanitizedName,
+      rootInterfaceNameWithI,
       typeInfo,
       []
     );
@@ -229,5 +237,5 @@ export function jsonToInterface(
 
   // 원시 타입인 경우
   const primitiveType = inferType(data, sanitizedName, typeInfo, []);
-  return `type ${sanitizedName} = ${primitiveType};`;
+  return `type ${rootInterfaceNameWithI} = ${primitiveType};`;
 }
