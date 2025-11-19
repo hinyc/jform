@@ -22,7 +22,9 @@
       "placeholder": "e.g., { \"name\": \"John\", \"age\": 30 }"
     },
     "formatArea": {
-      "resultTitle": "JSON Result"
+      "resultTitle": "JSON Result",
+      "jsonTab": "JSON",
+      "typescriptTab": "TypeScript"
     },
     "searchBar": {
       "placeholder": "Search for keys or values...",
@@ -44,6 +46,10 @@
     "treeView": {
       "parseError": "JSON Parse Error",
       "enterValidJson": "Please enter valid JSON"
+    },
+    "interfaceView": {
+      "generating": "Generating interface...",
+      "noInterface": "Cannot generate interface"
     }
   }
 }

@@ -10,6 +10,7 @@ import { t } from "@/lib/i18n";
 interface CopyButtonProps {
   data: unknown;
   error: string | null;
+  isInterface?: boolean;
 }
 
 /**
@@ -29,7 +30,7 @@ function formatJsonForCopy(data: unknown, indentDepth: number): string {
   }
 }
 
-export function CopyButton({ data, error }: CopyButtonProps) {
+export function CopyButton({ data, error, isInterface = false }: CopyButtonProps) {
   const [copied, setCopied] = useState(false);
   const indentDepth = useJsonFormatterStore((state) => state.indentDepth);
   const language = useI18nStore((state) => state.language);
@@ -41,8 +42,15 @@ export function CopyButton({ data, error }: CopyButtonProps) {
     }
 
     try {
-      const formattedJson = formatJsonForCopy(data, indentDepth);
-      await navigator.clipboard.writeText(formattedJson);
+      let textToCopy: string;
+      if (isInterface && typeof data === "string") {
+        // 인터페이스 문자열인 경우 그대로 복사
+        textToCopy = data;
+      } else {
+        // JSON 데이터인 경우 포맷팅하여 복사
+        textToCopy = formatJsonForCopy(data, indentDepth);
+      }
+      await navigator.clipboard.writeText(textToCopy);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (error) {

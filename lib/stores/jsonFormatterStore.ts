@@ -1,5 +1,11 @@
 import { create } from "zustand";
 import type { JsonInput, SearchResult } from "../types/jsonFormatter";
+import { jsonToInterface } from "../utils/jsonToInterface";
+
+interface TypeScriptInterface {
+  interfaceString: string | null;
+  error: string | null;
+}
 
 interface JsonFormatterState {
   jsonObjects: JsonInput[];
@@ -8,6 +14,7 @@ interface JsonFormatterState {
   searchMode: "global" | "individual";
   individualSearchResults: Record<string, SearchResult[]>;
   indentDepth: number;
+  typescriptInterfaces: Record<string, TypeScriptInterface>;
 
   addJsonObject: (rawText: string) => void;
   removeJsonObject: (id: string) => void;
@@ -19,6 +26,7 @@ interface JsonFormatterState {
   performIndividualSearch: (inputId: string, query: string) => void;
   clearIndividualSearch: (inputId: string) => void;
   setIndentDepth: (depth: number) => void;
+  generateTypeScriptInterface: (inputId: string) => void;
 }
 
 export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
@@ -28,6 +36,7 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
   searchMode: "global",
   individualSearchResults: {},
   indentDepth: 2,
+  typescriptInterfaces: {},
 
   addJsonObject: (rawText: string) => {
     const id = crypto.randomUUID();
@@ -50,9 +59,14 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
   },
 
   removeJsonObject: (id: string) => {
-    set((state) => ({
-      jsonObjects: state.jsonObjects.filter((obj) => obj.id !== id),
-    }));
+    set((state) => {
+      const newInterfaces = { ...state.typescriptInterfaces };
+      delete newInterfaces[id];
+      return {
+        jsonObjects: state.jsonObjects.filter((obj) => obj.id !== id),
+        typescriptInterfaces: newInterfaces,
+      };
+    });
   },
 
   updateJsonObject: (id: string, rawText: string) => {
@@ -294,5 +308,53 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
     // 1 이상 8 이하의 값만 허용
     const validDepth = Math.max(1, Math.min(8, Math.floor(depth)));
     set({ indentDepth: validDepth });
+  },
+
+  generateTypeScriptInterface: (inputId: string) => {
+    const { jsonObjects } = get();
+    const jsonObj = jsonObjects.find((obj) => obj.id === inputId);
+
+    if (!jsonObj) {
+      set((state) => ({
+        typescriptInterfaces: {
+          ...state.typescriptInterfaces,
+          [inputId]: { interfaceString: null, error: "JSON 객체를 찾을 수 없습니다." },
+        },
+      }));
+      return;
+    }
+
+    if (jsonObj.error || !jsonObj.parsedData) {
+      set((state) => ({
+        typescriptInterfaces: {
+          ...state.typescriptInterfaces,
+          [inputId]: {
+            interfaceString: null,
+            error: jsonObj.error || "유효한 JSON 데이터가 없습니다.",
+          },
+        },
+      }));
+      return;
+    }
+
+    try {
+      const interfaceString = jsonToInterface(jsonObj.parsedData, "Root");
+      set((state) => ({
+        typescriptInterfaces: {
+          ...state.typescriptInterfaces,
+          [inputId]: { interfaceString, error: null },
+        },
+      }));
+    } catch (error) {
+      set((state) => ({
+        typescriptInterfaces: {
+          ...state.typescriptInterfaces,
+          [inputId]: {
+            interfaceString: null,
+            error: error instanceof Error ? error.message : "인터페이스 생성 중 오류가 발생했습니다.",
+          },
+        },
+      }));
+    }
   },
 }));

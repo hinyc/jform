@@ -1,9 +1,11 @@
 "use client";
 
+import { useState } from "react";
 import { JsonInputCard } from "./JsonInputCard";
 import { JsonTreeView } from "./JsonTreeView";
 import { JsonSearchBar } from "./JsonSearchBar";
 import { CopyButton } from "./CopyButton";
+import { TypeScriptInterfaceView } from "./TypeScriptInterfaceView";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 import { useI18nStore } from "@/lib/stores/i18nStore";
@@ -23,12 +25,19 @@ export function JsonFormatArea({
   searchMode,
   globalSearchResults = [],
 }: JsonFormatAreaProps) {
+  const [activeTab, setActiveTab] = useState<"json" | "typescript">("json");
   const removeJsonObject = useJsonFormatterStore(
     (state) => state.removeJsonObject
   );
   const jsonObjects = useJsonFormatterStore((state) => state.jsonObjects);
   const individualSearchResults = useJsonFormatterStore(
     (state) => state.individualSearchResults
+  );
+  const typescriptInterfaces = useJsonFormatterStore(
+    (state) => state.typescriptInterfaces
+  );
+  const generateTypeScriptInterface = useJsonFormatterStore(
+    (state) => state.generateTypeScriptInterface
   );
   const language = useI18nStore((state) => state.language);
 
@@ -44,6 +53,16 @@ export function JsonFormatArea({
     searchMode === "individual"
       ? individualSearchResults[jsonObject.id] || []
       : globalSearchResults;
+
+  // 탭 전환 시 인터페이스 생성
+  const handleTabChange = (tab: "json" | "typescript") => {
+    setActiveTab(tab);
+    if (tab === "typescript") {
+      generateTypeScriptInterface(jsonObject.id);
+    }
+  };
+
+  const interfaceData = typescriptInterfaces[jsonObject.id];
 
   return (
     <Card className="w-full pt-0 gap-0" style={{ minHeight: "256px" }}>
@@ -81,41 +100,57 @@ export function JsonFormatArea({
           {/* 우측: JSON 결과 영역 */}
           <div style={{ minWidth: "400px", maxWidth: "60vw", width: "60%" }}>
             <div className="h-full w-full flex flex-col">
-              {/* 개별 검색 모드일 때만 검색바 표시 */}
-              {searchMode === "individual" && (
-                <div className="flex mb-4 gap-4 h-12 items-center justify-between">
-                  <h2 className="text-lg font-semibold shrink-0">
-                    {t("jsonFormatter.formatArea.resultTitle", language)}
-                  </h2>
-                  <div className="flex items-center gap-2 flex-1 justify-end">
+              {/* 탭 헤더 */}
+              <div className="flex mb-4 gap-4 h-12 items-center justify-between">
+                <div className="flex gap-1 border rounded-md p-1">
+                  <Button
+                    variant={activeTab === "json" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => handleTabChange("json")}
+                    className="h-7 px-3"
+                  >
+                    {t("jsonFormatter.formatArea.jsonTab", language)}
+                  </Button>
+                  <Button
+                    variant={activeTab === "typescript" ? "default" : "ghost"}
+                    size="sm"
+                    onClick={() => handleTabChange("typescript")}
+                    className="h-7 px-3"
+                  >
+                    {t("jsonFormatter.formatArea.typescriptTab", language)}
+                  </Button>
+                </div>
+                <div className="flex items-center gap-2 flex-1 justify-end">
+                  {searchMode === "individual" && activeTab === "json" && (
                     <div className="w-[60%]">
                       <JsonSearchBar inputId={jsonObject.id} />
                     </div>
+                  )}
+                  {activeTab === "json" ? (
                     <CopyButton
                       data={jsonObject.parsedData}
                       error={jsonObject.error}
                     />
-                  </div>
+                  ) : (
+                    <CopyButton
+                      data={interfaceData?.interfaceString || null}
+                      error={interfaceData?.error || null}
+                      isInterface={true}
+                    />
+                  )}
                 </div>
-              )}
-              {searchMode === "global" && (
-                <div className="flex  gap-4 h-12 items-center justify-between">
-                  <h2 className="text-lg font-semibold shrink-0">
-                    {t("jsonFormatter.formatArea.resultTitle", language)}
-                  </h2>
-                  <CopyButton
+              </div>
+              <div className="flex-1" style={{ minHeight: "200px" }}>
+                {activeTab === "json" ? (
+                  <JsonTreeView
+                    inputId={jsonObject.id}
                     data={jsonObject.parsedData}
                     error={jsonObject.error}
+                    searchResults={searchResults}
                   />
-                </div>
-              )}
-              <div className="flex-1" style={{ minHeight: "200px" }}>
-                <JsonTreeView
-                  inputId={jsonObject.id}
-                  data={jsonObject.parsedData}
-                  error={jsonObject.error}
-                  searchResults={searchResults}
-                />
+                ) : (
+                  <TypeScriptInterfaceView inputId={jsonObject.id} />
+                )}
               </div>
             </div>
           </div>

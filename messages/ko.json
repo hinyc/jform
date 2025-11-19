@@ -22,7 +22,9 @@
       "placeholder": "예: { \"name\": \"John\", \"age\": 30 }"
     },
     "formatArea": {
-      "resultTitle": "JSON 결과"
+      "resultTitle": "JSON 결과",
+      "jsonTab": "JSON",
+      "typescriptTab": "TypeScript"
     },
     "searchBar": {
       "placeholder": "키나 값을 검색하세요...",
@@ -44,6 +46,10 @@
     "treeView": {
       "parseError": "JSON 파싱 오류",
       "enterValidJson": "유효한 JSON을 입력해주세요"
+    },
+    "interfaceView": {
+      "generating": "인터페이스 생성 중...",
+      "noInterface": "인터페이스를 생성할 수 없습니다"
     }
   }
 }
