@@ -4,11 +4,13 @@ import { JsonInputCard } from "./JsonInputCard";
 import { JsonTreeView } from "./JsonTreeView";
 import { JsonSearchBar } from "./JsonSearchBar";
 import { CopyButton } from "./CopyButton";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 import { useI18nStore } from "@/lib/stores/i18nStore";
 import { t } from "@/lib/i18n";
 import type { JsonInput, SearchResult } from "@/lib/types/jsonFormatter";
+import { Button } from "@/components/ui/button";
+import { Trash2 } from "lucide-react";
 
 interface JsonFormatAreaProps {
   jsonObject: JsonInput;
@@ -44,17 +46,35 @@ export function JsonFormatArea({
       : globalSearchResults;
 
   return (
-    <Card className="w-full" style={{ minHeight: "256px" }}>
-      <CardContent className="px-4 py-2">
+    <Card className="w-full pt-0 gap-0" style={{ minHeight: "256px" }}>
+      <CardHeader className="px-4 h-9 py-0 flex items-center justify-end">
+        {canRemove && (
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleRemove}
+            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        )}
+      </CardHeader>
+      <CardContent className="px-4 py-0">
         <div className="flex flex-row gap-6 w-full">
           {/* 좌측: JSON 입력 영역 */}
           <div style={{ minWidth: "200px", maxWidth: "40vw", width: "40%" }}>
-            <div className="h-full flex flex-col">
-              <JsonInputCard
-                id={jsonObject.id}
-                initialValue={jsonObject.rawText}
-                onRemove={canRemove ? handleRemove : undefined}
-              />
+            <div className="h-full w-full flex flex-col">
+              <div className="flex  gap-4 h-12 items-center justify-between">
+                <h2 className="text-lg font-semibold shrink-0">
+                  {t("jsonFormatter.inputCard.title", language)}
+                </h2>
+              </div>
+              <div className="flex-1" style={{ minHeight: "200px" }}>
+                <JsonInputCard
+                  id={jsonObject.id}
+                  initialValue={jsonObject.rawText}
+                />
+              </div>
             </div>
           </div>
 
@@ -79,7 +99,7 @@ export function JsonFormatArea({
                 </div>
               )}
               {searchMode === "global" && (
-                <div className="flex mb-4 gap-4 h-12 items-center justify-between">
+                <div className="flex  gap-4 h-12 items-center justify-between">
                   <h2 className="text-lg font-semibold shrink-0">
                     {t("jsonFormatter.formatArea.resultTitle", language)}
                   </h2>

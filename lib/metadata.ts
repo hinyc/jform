@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   description:
     "Free online JSON formatter, beautifier, validator, and viewer. Format, validate, and beautify JSON data instantly. The best, most powerful, and most convenient JSON formatter tool.",
   keywords: [
+    "jform",
     "JSON formatter",
     "JSON beautifier",
     "JSON validator",
@@ -86,4 +87,3 @@ export const metadata: Metadata = {
   },
   category: "developer tools",
 };
-
