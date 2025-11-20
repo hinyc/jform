@@ -135,7 +135,7 @@ export function JsonFormatArea({
           <div style={{ minWidth: "400px", maxWidth: "60vw", width: "60%" }}>
             <div className="h-full w-full flex flex-col">
               {/* 뷰 선택 헤더 */}
-              <div className="flex mb-4 gap-4 h-12 items-center justify-between">
+              <div className="flex  gap-4 h-12 items-center justify-between">
                 <div className="flex items-center gap-2">
                   {/* 탭 버튼: JSON | 구조/인터페이스 */}
                   <div className="flex gap-1 border rounded-md p-1">

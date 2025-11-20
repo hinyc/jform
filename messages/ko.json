@@ -24,7 +24,7 @@
     "formatArea": {
       "resultTitle": "JSON 결과",
       "viewLabel": "뷰",
-      "jsonTab": "JSON",
+      "jsonTab": "결과",
       "interfaceTab": "구조/인터페이스",
       "typescriptTab": "TypeScript",
       "pythonTab": "Python"
@@ -56,4 +56,3 @@
     }
   }
 }
-

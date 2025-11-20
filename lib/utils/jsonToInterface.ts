@@ -6,6 +6,7 @@ interface TypeInfo {
   type: string;
   interfaces: Map<string, string>; // interfaceName -> interfaceString
   usedNames: Map<string, number>; // baseName -> count (중복 체크용)
+  interfaceSignatures: Map<string, string>; // signature -> interfaceName (중복 제거용)
 }
 
 /**
@@ -111,38 +112,21 @@ function inferType(
 
   if (valueType === "object" && value !== null) {
     const obj = value as Record<string, unknown>;
-    // 뎁스의 마지막 값만 사용하여 인터페이스 이름 생성
-    const nestedInterfaceName = generateInterfaceName(
-      `${interfaceName}Item`,
-      path,
-      typeInfo.usedNames
-    );
-
-    // 중첩 인터페이스 생성
-    if (!typeInfo.interfaces.has(nestedInterfaceName)) {
-      const nestedInterface = generateInterface(
-        obj,
-        nestedInterfaceName,
-        typeInfo,
-        path
-      );
-      typeInfo.interfaces.set(nestedInterfaceName, nestedInterface);
-    }
-
-    return nestedInterfaceName;
+    return createInterface(obj, `${interfaceName}Item`, typeInfo, path);
   }
 
   return "unknown";
 }
 
 /**
- * 객체에서 인터페이스 생성
+ * 객체에서 인터페이스를 생성하거나 기존 것을 재사용
  */
-function generateInterface(
+function createInterface(
   obj: Record<string, unknown>,
-  interfaceName: string,
+  baseName: string,
   typeInfo: TypeInfo,
-  parentPath: string[] = []
+  parentPath: string[] = [],
+  options: { forceName?: string } = {}
 ): string {
   const properties: string[] = [];
   const seenKeys = new Set<string>();
@@ -151,13 +135,12 @@ function generateInterface(
     if (seenKeys.has(key)) continue;
     seenKeys.add(key);
 
-    // null 가능성 처리: 값이 null이면 unknown | null로 표시
     if (value === null) {
       properties.push(`  ${key}: unknown | null;`);
       continue;
     }
 
-    const inferredType = inferType(value, interfaceName, typeInfo, [
+    const inferredType = inferType(value, baseName, typeInfo, [
       ...parentPath,
       key,
     ]);
@@ -165,7 +148,27 @@ function generateInterface(
     properties.push(`  ${key}: ${inferredType};`);
   }
 
-  return `interface ${interfaceName} {\n${properties.join("\n")}\n}`;
+  const signature = properties
+    .map((line) => line.trim())
+    .sort()
+    .join("|");
+
+  if (!options.forceName && typeInfo.interfaceSignatures.has(signature)) {
+    return typeInfo.interfaceSignatures.get(signature)!;
+  }
+
+  const interfaceName =
+    options.forceName ||
+    generateInterfaceName(baseName, parentPath, typeInfo.usedNames);
+
+  const interfaceString = `interface ${interfaceName} {\n${properties.join(
+    "\n"
+  )}\n}`;
+
+  typeInfo.interfaces.set(interfaceName, interfaceString);
+  typeInfo.interfaceSignatures.set(signature, interfaceName);
+
+  return interfaceName;
 }
 
 /**
@@ -187,6 +190,7 @@ export function jsonToInterface(
     type: "",
     interfaces: new Map(),
     usedNames: new Map(),
+    interfaceSignatures: new Map(),
   };
 
   const sanitizedName = sanitizeTypeName(rootInterfaceName);
@@ -203,20 +207,6 @@ export function jsonToInterface(
 
     // 배열의 첫 번째 요소로 타입 추론
     const firstItem = data[0];
-    if (
-      typeof firstItem === "object" &&
-      firstItem !== null &&
-      !Array.isArray(firstItem)
-    ) {
-      const itemName = generateInterfaceName("Item", [], typeInfo.usedNames);
-      generateInterface(
-        firstItem as Record<string, unknown>,
-        itemName,
-        typeInfo,
-        []
-      );
-    }
-
     const itemType = inferType(firstItem, "Item", typeInfo, []);
     const interfaces = Array.from(typeInfo.interfaces.values()).join("\n\n");
     const mainType = `type ${rootInterfaceNameWithI} = ${itemType}[];`;
@@ -225,11 +215,12 @@ export function jsonToInterface(
   }
 
   if (typeof data === "object" && data !== null) {
-    generateInterface(
+    createInterface(
       data as Record<string, unknown>,
       rootInterfaceNameWithI,
       typeInfo,
-      []
+      [],
+      { forceName: rootInterfaceNameWithI }
     );
     const interfaces = Array.from(typeInfo.interfaces.values());
     return interfaces.join("\n\n");
