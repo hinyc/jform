@@ -8,25 +8,10 @@ import { useI18nStore } from "@/lib/stores/i18nStore";
 import { t } from "@/lib/i18n";
 import { compareObjects } from "@/lib/utils/compareObjects";
 
-const SAMPLE_LEFT = `{
-  "name": "JForm",
-  "version": 1,
-  "features": ["formatter", "share"],
-  "meta": { "updatedAt": "2024-11-01" }
-}`;
-
-const SAMPLE_RIGHT = `{
-  "name": "JForm",
-  "version": 2,
-  "features": ["formatter", "diff"],
-  "meta": { "updatedAt": "2024-12-01" },
-  "status": "beta"
-}`;
-
 export function DiffViewer() {
   const language = useI18nStore((state) => state.language);
-  const [leftInput, setLeftInput] = useState(SAMPLE_LEFT);
-  const [rightInput, setRightInput] = useState(SAMPLE_RIGHT);
+  const [leftInput, setLeftInput] = useState("");
+  const [rightInput, setRightInput] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
 
@@ -119,6 +104,7 @@ export function DiffViewer() {
           activeLabel={diffSummary}
           sameLabel={sameLabel}
           hints={hints}
+          canCompare={canCompare && !error}
         />
         <DiffEditor
           leftValue={leftInput}

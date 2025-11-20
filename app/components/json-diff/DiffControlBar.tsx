@@ -15,6 +15,7 @@ type DiffControlBarProps = {
     prev: string;
     next: string;
   };
+  canCompare: boolean;
 };
 
 export function DiffControlBar({
@@ -25,6 +26,7 @@ export function DiffControlBar({
   activeLabel,
   sameLabel,
   hints,
+  canCompare,
 }: DiffControlBarProps) {
   const hasDiffs = total > 0;
 
@@ -38,7 +40,7 @@ export function DiffControlBar({
             : "text-emerald-700 dark:text-emerald-300"
         )}
       >
-        {hasDiffs ? activeLabel : sameLabel}
+        {canCompare ? (hasDiffs ? activeLabel : sameLabel) : null}
       </div>
       <div className="flex items-center gap-2">
         <Button
@@ -70,5 +72,3 @@ export function DiffControlBar({
     </div>
   );
 }
-
-
