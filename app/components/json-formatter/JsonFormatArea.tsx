@@ -6,6 +6,7 @@ import { JsonTreeView } from "./JsonTreeView";
 import { JsonSearchBar } from "./JsonSearchBar";
 import { CopyButton } from "./CopyButton";
 import { TypeScriptInterfaceView } from "./TypeScriptInterfaceView";
+import { PythonInterfaceView } from "./PythonInterfaceView";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
 import { useI18nStore } from "@/lib/stores/i18nStore";
@@ -25,7 +26,10 @@ export function JsonFormatArea({
   searchMode,
   globalSearchResults = [],
 }: JsonFormatAreaProps) {
-  const [activeTab, setActiveTab] = useState<"json" | "typescript">("json");
+  const [viewType, setViewType] = useState<"json" | "interface">("json");
+  const [interfaceLanguage, setInterfaceLanguage] = useState<
+    "typescript" | "python"
+  >("typescript");
   const removeJsonObject = useJsonFormatterStore(
     (state) => state.removeJsonObject
   );
@@ -36,8 +40,14 @@ export function JsonFormatArea({
   const typescriptInterfaces = useJsonFormatterStore(
     (state) => state.typescriptInterfaces
   );
+  const pythonInterfaces = useJsonFormatterStore(
+    (state) => state.pythonInterfaces
+  );
   const generateTypeScriptInterface = useJsonFormatterStore(
     (state) => state.generateTypeScriptInterface
+  );
+  const generatePythonInterface = useJsonFormatterStore(
+    (state) => state.generatePythonInterface
   );
   const language = useI18nStore((state) => state.language);
 
@@ -54,15 +64,39 @@ export function JsonFormatArea({
       ? individualSearchResults[jsonObject.id] || []
       : globalSearchResults;
 
-  // 탭 전환 시 인터페이스 생성
-  const handleTabChange = (tab: "json" | "typescript") => {
-    setActiveTab(tab);
-    if (tab === "typescript") {
-      generateTypeScriptInterface(jsonObject.id);
+  // 뷰 타입 변경
+  const handleViewTypeChange = (type: "json" | "interface") => {
+    setViewType(type);
+    if (type === "interface") {
+      // 인터페이스 선택 시 현재 선택된 언어로 생성
+      if (interfaceLanguage === "typescript") {
+        generateTypeScriptInterface(jsonObject.id);
+      } else {
+        generatePythonInterface(jsonObject.id);
+      }
     }
   };
 
-  const interfaceData = typescriptInterfaces[jsonObject.id];
+  // 인터페이스 언어 변경
+  const handleInterfaceLanguageChange = (lang: "typescript" | "python") => {
+    setInterfaceLanguage(lang);
+    if (lang === "typescript") {
+      generateTypeScriptInterface(jsonObject.id);
+    } else {
+      generatePythonInterface(jsonObject.id);
+    }
+  };
+
+  // 실제 활성 뷰 계산
+  const activeView =
+    viewType === "json"
+      ? "json"
+      : interfaceLanguage === "typescript"
+      ? "typescript"
+      : "python";
+
+  const typescriptInterfaceData = typescriptInterfaces[jsonObject.id];
+  const pythonInterfaceData = pythonInterfaces[jsonObject.id];
 
   return (
     <Card className="w-full pt-0 gap-0" style={{ minHeight: "256px" }}>
@@ -100,56 +134,86 @@ export function JsonFormatArea({
           {/* 우측: JSON 결과 영역 */}
           <div style={{ minWidth: "400px", maxWidth: "60vw", width: "60%" }}>
             <div className="h-full w-full flex flex-col">
-              {/* 탭 헤더 */}
+              {/* 뷰 선택 헤더 */}
               <div className="flex mb-4 gap-4 h-12 items-center justify-between">
-                <div className="flex gap-1 border rounded-md p-1">
-                  <Button
-                    variant={activeTab === "json" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => handleTabChange("json")}
-                    className="h-7 px-3"
-                  >
-                    {t("jsonFormatter.formatArea.jsonTab", language)}
-                  </Button>
-                  <Button
-                    variant={activeTab === "typescript" ? "default" : "ghost"}
-                    size="sm"
-                    onClick={() => handleTabChange("typescript")}
-                    className="h-7 px-3"
-                  >
-                    {t("jsonFormatter.formatArea.typescriptTab", language)}
-                  </Button>
+                <div className="flex items-center gap-2">
+                  {/* 탭 버튼: JSON | 구조/인터페이스 */}
+                  <div className="flex gap-1 border rounded-md p-1">
+                    <Button
+                      variant={viewType === "json" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => handleViewTypeChange("json")}
+                      className="h-7 px-3"
+                    >
+                      {t("jsonFormatter.formatArea.jsonTab", language)}
+                    </Button>
+                    <Button
+                      variant={viewType === "interface" ? "default" : "ghost"}
+                      size="sm"
+                      onClick={() => handleViewTypeChange("interface")}
+                      className="h-7 px-3"
+                    >
+                      {t("jsonFormatter.formatArea.interfaceTab", language)}
+                    </Button>
+                  </div>
+                  {/* 구조/인터페이스 선택 시 언어 드롭다운 */}
+                  {viewType === "interface" && (
+                    <select
+                      value={interfaceLanguage}
+                      onChange={(e) =>
+                        handleInterfaceLanguageChange(
+                          e.target.value as "typescript" | "python"
+                        )
+                      }
+                      className="h-8 px-3 text-sm border rounded-md bg-background focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                      <option value="typescript">
+                        {t("jsonFormatter.formatArea.typescriptTab", language)}
+                      </option>
+                      <option value="python">
+                        {t("jsonFormatter.formatArea.pythonTab", language)}
+                      </option>
+                    </select>
+                  )}
                 </div>
                 <div className="flex items-center gap-2 flex-1 justify-end">
-                  {searchMode === "individual" && activeTab === "json" && (
+                  {searchMode === "individual" && activeView === "json" && (
                     <div className="w-[60%]">
                       <JsonSearchBar inputId={jsonObject.id} />
                     </div>
                   )}
-                  {activeTab === "json" ? (
+                  {activeView === "json" ? (
                     <CopyButton
                       data={jsonObject.parsedData}
                       error={jsonObject.error}
                     />
+                  ) : activeView === "typescript" ? (
+                    <CopyButton
+                      data={typescriptInterfaceData?.interfaceString || null}
+                      error={typescriptInterfaceData?.error || null}
+                      isInterface={true}
+                    />
                   ) : (
                     <CopyButton
-                      data={interfaceData?.interfaceString || null}
-                      error={interfaceData?.error || null}
+                      data={pythonInterfaceData?.interfaceString || null}
+                      error={pythonInterfaceData?.error || null}
                       isInterface={true}
                     />
                   )}
                 </div>
               </div>
               <div className="flex-1" style={{ minHeight: "200px" }}>
-                {activeTab === "json" ? (
+                {activeView === "json" ? (
                   <JsonTreeView
                     inputId={jsonObject.id}
                     data={jsonObject.parsedData}
                     error={jsonObject.error}
                     searchResults={searchResults}
                   />
-                ) : (
+                ) : activeView === "typescript" ? (
                   <TypeScriptInterfaceView inputId={jsonObject.id} />
+                ) : (
+                  <PythonInterfaceView inputId={jsonObject.id} />
                 )}
               </div>
             </div>

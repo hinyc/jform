@@ -1,8 +1,14 @@
 import { create } from "zustand";
 import type { JsonInput, SearchResult } from "../types/jsonFormatter";
 import { jsonToInterface } from "../utils/jsonToInterface";
+import { jsonToPydantic } from "../utils/jsonToPydantic";
 
 interface TypeScriptInterface {
+  interfaceString: string | null;
+  error: string | null;
+}
+
+interface PythonInterface {
   interfaceString: string | null;
   error: string | null;
 }
@@ -15,6 +21,7 @@ interface JsonFormatterState {
   individualSearchResults: Record<string, SearchResult[]>;
   indentDepth: number;
   typescriptInterfaces: Record<string, TypeScriptInterface>;
+  pythonInterfaces: Record<string, PythonInterface>;
 
   addJsonObject: (rawText: string) => void;
   removeJsonObject: (id: string) => void;
@@ -27,6 +34,7 @@ interface JsonFormatterState {
   clearIndividualSearch: (inputId: string) => void;
   setIndentDepth: (depth: number) => void;
   generateTypeScriptInterface: (inputId: string) => void;
+  generatePythonInterface: (inputId: string) => void;
 }
 
 export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
@@ -37,6 +45,7 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
   individualSearchResults: {},
   indentDepth: 2,
   typescriptInterfaces: {},
+  pythonInterfaces: {},
 
   addJsonObject: (rawText: string) => {
     const id = crypto.randomUUID();
@@ -60,11 +69,14 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
 
   removeJsonObject: (id: string) => {
     set((state) => {
-      const newInterfaces = { ...state.typescriptInterfaces };
-      delete newInterfaces[id];
+      const newTypeScriptInterfaces = { ...state.typescriptInterfaces };
+      const newPythonInterfaces = { ...state.pythonInterfaces };
+      delete newTypeScriptInterfaces[id];
+      delete newPythonInterfaces[id];
       return {
         jsonObjects: state.jsonObjects.filter((obj) => obj.id !== id),
-        typescriptInterfaces: newInterfaces,
+        typescriptInterfaces: newTypeScriptInterfaces,
+        pythonInterfaces: newPythonInterfaces,
       };
     });
   },
@@ -349,6 +361,54 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
       set((state) => ({
         typescriptInterfaces: {
           ...state.typescriptInterfaces,
+          [inputId]: {
+            interfaceString: null,
+            error: error instanceof Error ? error.message : "인터페이스 생성 중 오류가 발생했습니다.",
+          },
+        },
+      }));
+    }
+  },
+
+  generatePythonInterface: (inputId: string) => {
+    const { jsonObjects } = get();
+    const jsonObj = jsonObjects.find((obj) => obj.id === inputId);
+
+    if (!jsonObj) {
+      set((state) => ({
+        pythonInterfaces: {
+          ...state.pythonInterfaces,
+          [inputId]: { interfaceString: null, error: "JSON 객체를 찾을 수 없습니다." },
+        },
+      }));
+      return;
+    }
+
+    if (jsonObj.error || !jsonObj.parsedData) {
+      set((state) => ({
+        pythonInterfaces: {
+          ...state.pythonInterfaces,
+          [inputId]: {
+            interfaceString: null,
+            error: jsonObj.error || "유효한 JSON 데이터가 없습니다.",
+          },
+        },
+      }));
+      return;
+    }
+
+    try {
+      const interfaceString = jsonToPydantic(jsonObj.parsedData, "Root");
+      set((state) => ({
+        pythonInterfaces: {
+          ...state.pythonInterfaces,
+          [inputId]: { interfaceString, error: null },
+        },
+      }));
+    } catch (error) {
+      set((state) => ({
+        pythonInterfaces: {
+          ...state.pythonInterfaces,
           [inputId]: {
             interfaceString: null,
             error: error instanceof Error ? error.message : "인터페이스 생성 중 오류가 발생했습니다.",

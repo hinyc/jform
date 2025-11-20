@@ -23,8 +23,11 @@
     },
     "formatArea": {
       "resultTitle": "JSON Result",
+      "viewLabel": "View",
       "jsonTab": "JSON",
-      "typescriptTab": "TypeScript"
+      "interfaceTab": "Structure/Interface",
+      "typescriptTab": "TypeScript",
+      "pythonTab": "Python"
     },
     "searchBar": {
       "placeholder": "Search for keys or values...",

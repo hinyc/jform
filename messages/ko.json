@@ -23,8 +23,11 @@
     },
     "formatArea": {
       "resultTitle": "JSON 결과",
+      "viewLabel": "뷰",
       "jsonTab": "JSON",
-      "typescriptTab": "TypeScript"
+      "interfaceTab": "구조/인터페이스",
+      "typescriptTab": "TypeScript",
+      "pythonTab": "Python"
     },
     "searchBar": {
       "placeholder": "키나 값을 검색하세요...",
