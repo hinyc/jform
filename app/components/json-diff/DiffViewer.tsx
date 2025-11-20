@@ -102,28 +102,34 @@ export function DiffViewer() {
     next: t("jsonDiff.hints.next", language),
   };
 
-  const diffSummary = `${t("jsonDiff.status.differences", language)}: ${diffCount}`;
+  const diffSummary = `${t(
+    "jsonDiff.status.differences",
+    language
+  )}: ${diffCount}`;
   const sameLabel = t("jsonDiff.status.same", language);
 
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-6">
-      <DiffControlBar
-        total={diffCount}
-        currentIndex={Math.max(activeIndex, 0)}
-        onPrev={handlePrev}
-        onNext={handleNext}
-        activeLabel={diffSummary}
-        sameLabel={sameLabel}
-        hints={hints}
-      />
-      <DiffEditor
-        leftValue={leftInput}
-        rightValue={rightInput}
-        onLeftChange={setLeftInput}
-        onRightChange={setRightInput}
-        labels={editorLabels}
-        placeholders={placeholders}
-      />
+      <div className="sticky top-18 z-10 flex flex-col gap-4 bg-zinc-50/95 pb-4 pt-2 backdrop-blur-sm dark:bg-black/95">
+        <DiffControlBar
+          total={diffCount}
+          currentIndex={Math.max(activeIndex, 0)}
+          onPrev={handlePrev}
+          onNext={handleNext}
+          activeLabel={diffSummary}
+          sameLabel={sameLabel}
+          hints={hints}
+        />
+        <DiffEditor
+          leftValue={leftInput}
+          rightValue={rightInput}
+          onLeftChange={setLeftInput}
+          onRightChange={setRightInput}
+          labels={editorLabels}
+          placeholders={placeholders}
+          activeDiff={activeIndex >= 0 ? diffs[activeIndex] : null}
+        />
+      </div>
       {!canCompare && (
         <p className="rounded-xl border border-dashed border-zinc-300 bg-white/70 p-4 text-center text-sm text-zinc-500 dark:border-zinc-700 dark:bg-zinc-900/60 dark:text-zinc-400">
           {t("jsonDiff.status.empty", language)}
@@ -147,5 +153,3 @@ export function DiffViewer() {
     </section>
   );
 }
-
-
