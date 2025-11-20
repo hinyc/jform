@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -36,44 +36,40 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
     : searchResults;
 
   // 개별 검색 모드면 로컬 상태로 관리, 전체 검색 모드면 store의 searchQuery 사용
-  const [localQuery, setLocalQuery] = useState(
-    inputId ? "" : searchQuery
-  );
+  const [localQuery, setLocalQuery] = useState("");
   // 검색을 실행했는지 여부 추적
   const [hasSearched, setHasSearched] = useState(false);
 
-  // 전체 검색 모드일 때 searchQuery 변경 시 로컬 상태 동기화
-  useEffect(() => {
-    if (!inputId) {
-      setLocalQuery(searchQuery);
-      // searchQuery가 비어있으면 검색 실행 여부 초기화
-      if (!searchQuery.trim()) {
-        setHasSearched(false);
-      }
-    }
-  }, [searchQuery, inputId]);
+  const queryValue = inputId ? localQuery : searchQuery;
 
-  const handleSearch = () => {
+  const handleChange = (value: string) => {
     if (inputId) {
-      // 개별 검색
-      performIndividualSearch(inputId, localQuery);
-      setHasSearched(true);
+      setLocalQuery(value);
     } else {
-      // 전체 검색
-      setSearchQuery(localQuery);
-      performSearch();
-      setHasSearched(true);
+      setSearchQuery(value);
+    }
+    if (!value.trim()) {
+      setHasSearched(false);
     }
   };
 
-  const handleClear = () => {
-    setLocalQuery("");
-    setHasSearched(false);
+  const handleSearch = () => {
     if (inputId) {
+      performIndividualSearch(inputId, queryValue);
+    } else {
+      performSearch();
+    }
+    setHasSearched(true);
+  };
+
+  const handleClear = () => {
+    if (inputId) {
+      setLocalQuery("");
       clearIndividualSearch(inputId);
     } else {
       clearSearch();
     }
+    setHasSearched(false);
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -90,13 +86,13 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
           <Input
             type="text"
             placeholder={t("jsonFormatter.searchBar.placeholder", language)}
-            value={localQuery}
-            onChange={(e) => setLocalQuery(e.target.value)}
+            value={queryValue}
+            onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyPress}
             className="pl-9 pr-9"
             disabled={disabled}
           />
-          {localQuery && (
+          {queryValue && (
             <button
               onClick={handleClear}
               className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
@@ -110,7 +106,7 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
           {t("common.search", language)}
         </Button>
       </div>
-      {hasSearched && localQuery.trim() && (
+      {hasSearched && queryValue.trim() && (
         <div className="text-sm text-gray-600 dark:text-gray-400">
           {currentSearchResults.length > 0
             ? language === "ko"

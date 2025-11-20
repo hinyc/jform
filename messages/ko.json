@@ -10,6 +10,10 @@
     "ko": "한국어",
     "en": "English"
   },
+  "navigation": {
+    "formatter": "JSON 포매터",
+    "diff": "JSON 비교"
+  },
   "jsonFormatter": {
     "header": {
       "indentDepth": "들여쓰기:",
@@ -53,6 +57,37 @@
     "interfaceView": {
       "generating": "인터페이스 생성 중...",
       "noInterface": "인터페이스를 생성할 수 없습니다"
+    }
+  },
+  "jsonDiff": {
+    "inputs": {
+      "leftLabel": "왼쪽 JSON",
+      "rightLabel": "오른쪽 JSON",
+      "leftPlaceholder": "{ \"name\": \"홍길동\" }",
+      "rightPlaceholder": "{ \"name\": \"김철수\" }"
+    },
+    "blocks": {
+      "path": "경로",
+      "left": "왼쪽 값",
+      "right": "오른쪽 값",
+      "empty": "존재하지 않음"
+    },
+    "types": {
+      "added": "추가됨",
+      "removed": "삭제됨",
+      "changed": "변경됨"
+    },
+    "hints": {
+      "prev": "이전 차이",
+      "next": "다음 차이"
+    },
+    "status": {
+      "differences": "차이",
+      "same": "완벽히 일치합니다",
+      "empty": "좌우에 JSON을 입력하면 비교할 수 있어요"
+    },
+    "errors": {
+      "invalid": "올바른 JSON 객체를 입력해주세요."
     }
   }
 }

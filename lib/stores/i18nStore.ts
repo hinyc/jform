@@ -22,7 +22,9 @@ function detectDefaultLanguage(): Language {
   }
 
   // 브라우저 언어 설정 확인
-  const browserLang = navigator.language || (navigator as any).userLanguage;
+  const browserWithFallback =
+    navigator as Navigator & { userLanguage?: string | undefined };
+  const browserLang = browserWithFallback.language || browserWithFallback.userLanguage || "";
   if (browserLang.startsWith("ko")) {
     return "ko";
   }
@@ -33,7 +35,7 @@ function detectDefaultLanguage(): Language {
 
 export const useI18nStore = create<I18nState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       language: "en", // 기본값, persist가 localStorage에서 복원함
       setLanguage: (lang: Language) => {
         set({ language: lang });

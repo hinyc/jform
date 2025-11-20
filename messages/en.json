@@ -10,6 +10,10 @@
     "ko": "한국어",
     "en": "English"
   },
+  "navigation": {
+    "formatter": "Formatter",
+    "diff": "JSON Diff"
+  },
   "jsonFormatter": {
     "header": {
       "indentDepth": "Indent:",
@@ -53,6 +57,37 @@
     "interfaceView": {
       "generating": "Generating interface...",
       "noInterface": "Cannot generate interface"
+    }
+  },
+  "jsonDiff": {
+    "inputs": {
+      "leftLabel": "Left JSON",
+      "rightLabel": "Right JSON",
+      "leftPlaceholder": "{ \"name\": \"Alice\" }",
+      "rightPlaceholder": "{ \"name\": \"Bob\" }"
+    },
+    "blocks": {
+      "path": "Path",
+      "left": "Left value",
+      "right": "Right value",
+      "empty": "Not present"
+    },
+    "types": {
+      "added": "Added",
+      "removed": "Removed",
+      "changed": "Changed"
+    },
+    "hints": {
+      "prev": "Previous difference",
+      "next": "Next difference"
+    },
+    "status": {
+      "differences": "Differences",
+      "same": "Perfect match",
+      "empty": "Add JSON on both sides to compare"
+    },
+    "errors": {
+      "invalid": "Please enter valid JSON objects."
     }
   }
 }
