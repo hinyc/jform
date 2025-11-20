@@ -24,7 +24,7 @@
     "formatArea": {
       "resultTitle": "JSON Result",
       "viewLabel": "View",
-      "jsonTab": "JSON",
+      "jsonTab": "Result",
       "interfaceTab": "Structure/Interface",
       "typescriptTab": "TypeScript",
       "pythonTab": "Python"

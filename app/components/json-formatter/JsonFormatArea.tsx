@@ -143,7 +143,7 @@ export function JsonFormatArea({
                       variant={viewType === "json" ? "default" : "ghost"}
                       size="sm"
                       onClick={() => handleViewTypeChange("json")}
-                      className="h-7 px-3"
+                      className="h-7 px-3 w-16"
                     >
                       {t("jsonFormatter.formatArea.jsonTab", language)}
                     </Button>
