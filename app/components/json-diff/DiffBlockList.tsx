@@ -50,7 +50,8 @@ export function DiffBlockList({
           >
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="text-sm font-semibold text-zinc-700 dark:text-zinc-200">
-                {labels.path}: <span className="font-mono">{diff.path}</span>
+                {labels.path}:{" "}
+                <span className="font-mono">{formatPath(diff.path)}</span>
               </div>
               <span
                 className={cn(
@@ -135,4 +136,9 @@ function formatValue(value: unknown, emptyLabel: string) {
   }
 }
 
-
+function formatPath(path: string) {
+  return path
+    .replace(/^\$\.?/, "root")
+    .replace(/\./g, " > ")
+    .replace(/\[(\d+)\]/g, " > $1");
+}
