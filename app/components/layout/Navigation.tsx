@@ -44,7 +44,7 @@ function ActiveIndicator({
 
   return (
     <span
-      className="absolute bottom-0 h-0.5 bg-cyan-500 transition-all duration-300 ease-out dark:bg-cyan-400"
+      className="absolute bottom-0 h-0.5 bg-brand-primary-500 transition-all duration-300 ease-out dark:bg-brand-primary-400"
       style={{
         left: style.left,
         width: style.width,
@@ -101,9 +101,9 @@ export default function Navigation() {
                 href={tab.href}
                 id={`nav-tab-${tab.href}`}
                 className={cn(
-                  "relative px-[10px] pb-3 text-sm font-medium transition-colors",
+                  "relative px-[10px] pb-2 text-md font-medium transition-colors",
                   isActive
-                    ? "text-cyan-500 dark:text-cyan-400"
+                    ? "text-brand-primary-500 dark:text-brand-primary-400"
                     : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200",
                 )}
               >

@@ -72,7 +72,7 @@ export function DiffEditor({
           </button>
           <span
             className={cn(
-              "absolute left-1 top-1 h-[calc(100%-0.5rem)] rounded-md bg-cyan-500 transition-all duration-200 ease-out dark:bg-cyan-400",
+              "absolute left-1 top-1 h-[calc(100%-0.5rem)] rounded-md bg-brand-primary-500 transition-all duration-200 ease-out dark:bg-brand-primary-400",
               mode === "edit" ? "w-[calc(50%-0.25rem)]" : "w-[calc(50%-0.25rem)] translate-x-full"
             )}
           />
