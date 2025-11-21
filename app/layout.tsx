@@ -1,6 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Navigation from "./components/Navigation";
+import Navigation from "./components/layout/Navigation";
 import { LanguageInitializer } from "./components/LanguageInitializer";
 import { metadata } from "@/lib/metadata";
 import { jsonLdSchema } from "@/lib/jsonLd";
