@@ -6,30 +6,30 @@ import { DiffControlBar } from "./DiffControlBar";
 import { DiffBlockList } from "./DiffBlockList";
 import { useI18nStore } from "@/lib/stores/i18nStore";
 import { t } from "@/lib/i18n";
+import { useDiffStore } from "@/lib/stores/diffStore";
 import { compareObjects } from "@/lib/utils/compareObjects";
 
 export function DiffViewer() {
   const language = useI18nStore((state) => state.language);
-  const [leftInput, setLeftInput] = useState("");
-  const [rightInput, setRightInput] = useState("");
+  const { leftValue, rightValue, setLeftValue, setRightValue } = useDiffStore();
   const [selectedIndex, setSelectedIndex] = useState(0);
   const blockRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const canCompare =
-    leftInput.trim().length > 0 && rightInput.trim().length > 0;
+    leftValue.trim().length > 0 && rightValue.trim().length > 0;
 
   const { diffs, error } = useMemo(() => {
     if (!canCompare) {
       return { diffs: [], error: undefined as string | undefined };
     }
     try {
-      const left = JSON.parse(leftInput);
-      const right = JSON.parse(rightInput);
+      const left = JSON.parse(leftValue);
+      const right = JSON.parse(rightValue);
       return { diffs: compareObjects(left, right), error: undefined };
     } catch {
       return { diffs: [], error: t("jsonDiff.errors.invalid", language) };
     }
-  }, [canCompare, leftInput, rightInput, language]);
+  }, [canCompare, leftValue, rightValue, language]);
 
   const diffCount = diffs.length;
   const activeIndex =
@@ -96,24 +96,26 @@ export function DiffViewer() {
   return (
     <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-6">
       <div className="sticky top-18 z-10 flex flex-col gap-4 bg-zinc-50/95 pb-4 pt-2 backdrop-blur-sm dark:bg-black/95">
-        <DiffControlBar
-          total={diffCount}
-          currentIndex={Math.max(activeIndex, 0)}
-          onPrev={handlePrev}
-          onNext={handleNext}
-          activeLabel={diffSummary}
-          sameLabel={sameLabel}
-          hints={hints}
-          canCompare={canCompare && !error}
-        />
         <DiffEditor
-          leftValue={leftInput}
-          rightValue={rightInput}
-          onLeftChange={setLeftInput}
-          onRightChange={setRightInput}
+          leftValue={leftValue}
+          rightValue={rightValue}
+          onLeftChange={setLeftValue}
+          onRightChange={setRightValue}
           labels={editorLabels}
           placeholders={placeholders}
           activeDiff={activeIndex >= 0 ? diffs[activeIndex] : null}
+          controlBar={
+            <DiffControlBar
+              total={diffCount}
+              currentIndex={Math.max(activeIndex, 0)}
+              onPrev={handlePrev}
+              onNext={handleNext}
+              activeLabel={diffSummary}
+              sameLabel={sameLabel}
+              hints={hints}
+              canCompare={canCompare && !error}
+            />
+          }
         />
       </div>
       {!canCompare && (

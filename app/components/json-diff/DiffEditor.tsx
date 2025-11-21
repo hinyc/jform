@@ -6,6 +6,8 @@ import { DiffResult } from "@/lib/utils/compareObjects";
 import { findJsonPathInString } from "@/lib/utils/findJsonPathInString";
 import { computeLineDiff } from "@/lib/utils/lineDiff";
 
+import { useDiffStore } from "@/lib/stores/diffStore";
+
 type DiffEditorProps = {
   leftValue: string;
   rightValue: string;
@@ -20,6 +22,7 @@ type DiffEditorProps = {
     right: string;
   };
   activeDiff: DiffResult | null;
+  controlBar?: React.ReactNode;
 };
 
 export function DiffEditor({
@@ -30,36 +33,29 @@ export function DiffEditor({
   labels,
   placeholders,
   activeDiff,
+  controlBar,
 }: DiffEditorProps) {
-  const [mode, setMode] = useState<"view" | "edit">("view");
+  const { mode, setMode } = useDiffStore();
+
+  const toggleMode = () => {
+    setMode(mode === "view" ? "edit" : "view");
+  };
 
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
-        <div className="flex rounded-lg border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-zinc-900">
-          <button
-            onClick={() => setMode("view")}
-            className={cn(
-              "rounded-md px-3 py-1 text-sm font-medium transition-colors",
-              mode === "view"
-                ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
-                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-            )}
-          >
-            View
-          </button>
-          <button
-            onClick={() => setMode("edit")}
-            className={cn(
-              "rounded-md px-3 py-1 text-sm font-medium transition-colors",
-              mode === "edit"
-                ? "bg-zinc-100 text-zinc-900 dark:bg-zinc-800 dark:text-zinc-100"
-                : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-100"
-            )}
-          >
-            Edit
-          </button>
+      <div className="flex h-[4.5rem] items-center justify-between gap-4">
+        <div className="flex-1">
+          {mode === "view" && controlBar}
         </div>
+        <button
+          onClick={toggleMode}
+          className={cn(
+            "flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors",
+            "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
+          )}
+        >
+          {mode === "view" ? "Edit Mode" : "View Mode"}
+        </button>
       </div>
 
       {mode === "view" ? (
