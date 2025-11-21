@@ -23,9 +23,16 @@ export const metadata: Metadata = {
     "JSON beautifier online",
     "JSON validator online",
     "JSON 포맷터",
+    "JSON 포매터",
     "JSON 포맷",
     "JSON 검증",
     "JSON 뷰어",
+    "제이슨포매터",
+    "제이슨포맷터",
+    "제이슨포맷",
+    "제이슨검증",
+    "제이슨뷰어",
+    "제이슨파서"
   ],
   authors: [{ name: "JForm" }],
   creator: "JForm",
@@ -37,6 +44,11 @@ export const metadata: Metadata = {
     { media: "(prefers-color-scheme: light)", color: "#ffffff" },
     { media: "(prefers-color-scheme: dark)", color: "#000000" },
   ],
+  icons: {
+    icon: "/symbol.png",
+    shortcut: "/symbol.png",
+    apple: "/symbol.png",
+  },
   alternates: {
     canonical: "https://jform.app",
     languages: {
