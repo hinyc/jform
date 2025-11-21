@@ -47,15 +47,36 @@ export function DiffEditor({
         <div className="flex-1">
           {mode === "view" && controlBar}
         </div>
-        <button
-          onClick={toggleMode}
-          className={cn(
-            "flex h-9 items-center justify-center rounded-lg px-4 text-sm font-medium transition-colors",
-            "bg-zinc-900 text-white hover:bg-zinc-800 dark:bg-white dark:text-zinc-900 dark:hover:bg-zinc-100"
-          )}
-        >
-          {mode === "view" ? "Edit Mode" : "View Mode"}
-        </button>
+        <div className="relative flex items-center rounded-lg border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-900">
+          <button
+            onClick={() => setMode("edit")}
+            className={cn(
+              "relative z-10 rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+              mode === "edit"
+                ? "text-white dark:text-zinc-900"
+                : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+            )}
+          >
+            Edit
+          </button>
+          <button
+            onClick={() => setMode("view")}
+            className={cn(
+              "relative z-10 rounded-md px-4 py-1.5 text-sm font-medium transition-colors",
+              mode === "view"
+                ? "text-white dark:text-zinc-900"
+                : "text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200"
+            )}
+          >
+            View
+          </button>
+          <span
+            className={cn(
+              "absolute left-1 top-1 h-[calc(100%-0.5rem)] rounded-md bg-cyan-500 transition-all duration-200 ease-out dark:bg-cyan-400",
+              mode === "edit" ? "w-[calc(50%-0.25rem)]" : "w-[calc(50%-0.25rem)] translate-x-full"
+            )}
+          />
+        </div>
       </div>
 
       {mode === "view" ? (
