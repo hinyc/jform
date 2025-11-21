@@ -224,7 +224,7 @@ function EditorField({
           ref={textareaRef}
           spellCheck={false}
           className={cn(
-            "relative block max-h-[calc(70vh-10rem)] min-h-80 w-full resize-none overflow-y-scroll whitespace-pre-wrap break-all rounded-2xl bg-transparent p-4 font-mono text-sm leading-5 text-zinc-900 outline-none dark:text-zinc-100",
+            "relative block max-h-[calc(70vh-10rem)] min-h-80 w-full resize-none overflow-y-scroll whitespace-pre-wrap break-all rounded-2xl bg-transparent p-4 font-mono text-sm leading-5 text-zinc-900 outline-none caret-transparent dark:text-zinc-100",
             "scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-700"
           )}
           placeholder={placeholder}

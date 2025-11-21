@@ -12,7 +12,7 @@
   },
   "navigation": {
     "formatter": "Formatter",
-    "diff": "JSON Diff"
+    "diff": "Compare"
   },
   "jsonFormatter": {
     "header": {
@@ -61,15 +61,15 @@
   },
   "jsonDiff": {
     "inputs": {
-      "leftLabel": "Left JSON",
-      "rightLabel": "Right JSON",
+      "leftLabel": "Source",
+      "rightLabel": "Target",
       "leftPlaceholder": "{ \"name\": \"Alice\" }",
       "rightPlaceholder": "{ \"name\": \"Bob\" }"
     },
     "blocks": {
       "path": "Path",
-      "left": "Left value",
-      "right": "Right value",
+      "left": "Source value",
+      "right": "Target value",
       "empty": "Not present"
     },
     "types": {

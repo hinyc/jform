@@ -44,7 +44,7 @@ function ActiveIndicator({
 
   return (
     <span
-      className="absolute bottom-0 h-0.5 bg-zinc-900 transition-all duration-300 ease-out dark:bg-white"
+      className="absolute bottom-0 h-0.5 bg-cyan-500 transition-all duration-300 ease-out dark:bg-cyan-400"
       style={{
         left: style.left,
         width: style.width,
@@ -103,7 +103,7 @@ export default function Navigation() {
                 className={cn(
                   "relative px-[10px] pb-3 text-sm font-medium transition-colors",
                   isActive
-                    ? "text-zinc-900 dark:text-white"
+                    ? "text-cyan-500 dark:text-cyan-400"
                     : "text-zinc-500 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-zinc-200",
                 )}
               >
@@ -114,7 +114,7 @@ export default function Navigation() {
           <ActiveIndicator pathname={pathname} tabs={tabs} />
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex h-full items-center gap-2">
         <ShareButton />
         <LanguageSelector />
       </div>

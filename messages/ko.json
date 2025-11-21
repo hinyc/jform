@@ -11,8 +11,8 @@
     "en": "English"
   },
   "navigation": {
-    "formatter": "JSON 포매터",
-    "diff": "JSON 비교"
+    "formatter": "포매터",
+    "diff": "비교"
   },
   "jsonFormatter": {
     "header": {
@@ -61,15 +61,15 @@
   },
   "jsonDiff": {
     "inputs": {
-      "leftLabel": "왼쪽 JSON",
-      "rightLabel": "오른쪽 JSON",
+      "leftLabel": "원본",
+      "rightLabel": "비교본",
       "leftPlaceholder": "{ \"name\": \"홍길동\" }",
       "rightPlaceholder": "{ \"name\": \"김철수\" }"
     },
     "blocks": {
       "path": "경로",
-      "left": "왼쪽 값",
-      "right": "오른쪽 값",
+      "left": "원본 값",
+      "right": "비교본 값",
       "empty": "존재하지 않음"
     },
     "types": {
