@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowDown, ArrowUp } from "lucide-react";
+import { ArrowDown, ArrowUp, ChevronDown, ChevronUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -30,43 +30,54 @@ export function DiffControlBar({
 }: DiffControlBarProps) {
   const hasDiffs = total > 0;
 
+  if (!canCompare) {
+    return null;
+  }
+
   return (
-    <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-zinc-200/80 bg-white/80 p-4 shadow-sm dark:border-zinc-800 dark:bg-zinc-900/60">
+    <div className="flex flex-wrap items-center justify-end gap-4 ">
       <div
         className={cn(
-          "flex items-center gap-2 text-sm font-semibold",
+          "flex items-center gap-4 text-sm font-semibold",
           hasDiffs
             ? "text-zinc-900 dark:text-white"
             : "text-emerald-700 dark:text-emerald-300"
         )}
       >
-        {canCompare ? (hasDiffs ? activeLabel : sameLabel) : null}
-      </div>
-      <div className="flex items-center gap-2">
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          disabled={!hasDiffs}
-          onClick={onPrev}
-          aria-label={hints.prev}
-        >
-          <ArrowUp className="size-4" />
-        </Button>
-        <Button
-          type="button"
-          size="icon-sm"
-          variant="ghost"
-          disabled={!hasDiffs}
-          onClick={onNext}
-          aria-label={hints.next}
-        >
-          <ArrowDown className="size-4" />
-        </Button>
-        {hasDiffs && (
-          <span className="text-xs font-semibold text-zinc-500 dark:text-zinc-400">
-            {currentIndex + 1} / {total}
-          </span>
+        {hasDiffs ? (
+          <div className="flex items-center gap-4">
+            <span className="text-md font-semibold text-zinc-500 dark:text-zinc-400">
+              <span className="font-bold">{activeLabel}</span>
+              <span className="inline-block w-10 text-right">
+                {currentIndex + 1}
+              </span>
+              &nbsp;/ {total}
+            </span>
+            <div className="flex items-center">
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                disabled={!hasDiffs}
+                onClick={onPrev}
+                aria-label={hints.prev}
+              >
+                <ChevronUp className="size-6 text-zinc-500 dark:text-zinc-400" />
+              </Button>
+              <Button
+                type="button"
+                size="icon-sm"
+                variant="ghost"
+                disabled={!hasDiffs}
+                onClick={onNext}
+                aria-label={hints.next}
+              >
+                <ChevronDown className="size-6 text-zinc-500 dark:text-zinc-400" />
+              </Button>
+            </div>
+          </div>
+        ) : (
+          sameLabel
         )}
       </div>
     </div>

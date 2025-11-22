@@ -87,15 +87,12 @@ export function DiffViewer() {
     next: t("jsonDiff.hints.next", language),
   };
 
-  const diffSummary = `${t(
-    "jsonDiff.status.differences",
-    language
-  )}: ${diffCount}`;
+  const diffSummary = `${t("jsonDiff.status.differences", language)}`;
   const sameLabel = t("jsonDiff.status.same", language);
 
   return (
-    <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 py-6">
-      <div className="sticky top-18 z-10 flex flex-col gap-4 bg-zinc-50/95 pb-4 pt-2 backdrop-blur-sm dark:bg-black/95">
+    <section className="mx-auto flex w-full max-w-6xl flex-col gap-6 pb-6">
+      <div className="sticky top-18 z-10 flex flex-col gap-4 bg-zinc-50/95 pb-4 backdrop-blur-sm dark:bg-black/95">
         <DiffEditor
           leftValue={leftValue}
           rightValue={rightValue}

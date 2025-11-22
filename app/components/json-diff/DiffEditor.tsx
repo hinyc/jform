@@ -37,16 +37,10 @@ export function DiffEditor({
 }: DiffEditorProps) {
   const { mode, setMode } = useDiffStore();
 
-  const toggleMode = () => {
-    setMode(mode === "view" ? "edit" : "view");
-  };
-
   return (
     <div className="space-y-4">
-      <div className="flex h-[4.5rem] items-center justify-between gap-4">
-        <div className="flex-1">
-          {mode === "view" && controlBar}
-        </div>
+      <div className="flex h-12 items-center justify-between gap-4">
+        <div className="flex-1">{mode === "view" && controlBar}</div>
         <div className="relative flex items-center rounded-lg border border-zinc-200 bg-zinc-50 p-1 dark:border-zinc-700 dark:bg-zinc-900">
           <button
             onClick={() => setMode("edit")}
@@ -73,7 +67,9 @@ export function DiffEditor({
           <span
             className={cn(
               "absolute left-1 top-1 h-[calc(100%-0.5rem)] rounded-md bg-brand-primary-500 transition-all duration-200 ease-out dark:bg-brand-primary-400",
-              mode === "edit" ? "w-[calc(50%-0.25rem)]" : "w-[calc(50%-0.25rem)] translate-x-full"
+              mode === "edit"
+                ? "w-[calc(50%-0.25rem)]"
+                : "w-[calc(50%-0.25rem)] translate-x-full"
             )}
           />
         </div>
@@ -148,7 +144,7 @@ function EditorField({
       side === "left" ? activeDiff.leftValue : activeDiff.rightValue;
 
     const parentPath = getParentPath(activeDiff.path);
-    
+
     // Handle root path separately
     if (parentPath === "$" && targetValue === undefined) {
       const trimmed = value.trimEnd();
@@ -164,14 +160,18 @@ function EditorField({
     }
 
     if (targetValue !== undefined) {
-      const position = findJsonPathInString(value, activeDiff.path, targetValue);
+      const position = findJsonPathInString(
+        value,
+        activeDiff.path,
+        targetValue
+      );
       setHighlightRange(position);
       if (position) scrollToPosition(position.start);
       return;
     }
 
     const parentPosition = findJsonPathInString(value, parentPath);
-    
+
     if (parentPosition) {
       const closingCharIndex = parentPosition.end - 1;
       setHighlightRange({
@@ -182,7 +182,6 @@ function EditorField({
     } else {
       setHighlightRange(null);
     }
-
   }, [activeDiff, value, side]);
 
   const scrollToPosition = (start: number) => {
@@ -245,7 +244,7 @@ function EditorField({
           ref={textareaRef}
           spellCheck={false}
           className={cn(
-            "relative block max-h-[calc(70vh-10rem)] min-h-80 w-full resize-none overflow-y-scroll whitespace-pre-wrap break-all rounded-2xl bg-transparent p-4 font-mono text-sm leading-5 text-zinc-900 outline-none caret-transparent dark:text-zinc-100",
+            "relative block max-h-[calc(70vh-10rem)] min-h-80 w-full resize-none overflow-y-scroll whitespace-pre-wrap break-all rounded-2xl bg-transparent p-4 font-mono text-sm leading-5 text-zinc-900 outline-none dark:text-zinc-100",
             "scrollbar-thin scrollbar-thumb-zinc-200 dark:scrollbar-thumb-zinc-700"
           )}
           placeholder={placeholder}
@@ -307,24 +306,34 @@ function AlignedDiffView({
   useEffect(() => {
     if (!activeDiff || !leftRef.current || !rightRef.current) return;
 
-    const targetValue = activeDiff.leftValue !== undefined ? activeDiff.leftValue : activeDiff.rightValue;
-    const sourceValue = activeDiff.leftValue !== undefined ? formattedLeft : formattedRight;
+    const targetValue =
+      activeDiff.leftValue !== undefined
+        ? activeDiff.leftValue
+        : activeDiff.rightValue;
+    const sourceValue =
+      activeDiff.leftValue !== undefined ? formattedLeft : formattedRight;
     const map = activeDiff.leftValue !== undefined ? leftMap : rightMap;
 
     if (targetValue !== undefined) {
-       // We need to find the path in the FORMATTED string, not the raw one
-       const position = findJsonPathInString(sourceValue, activeDiff.path, targetValue);
-       if (position) {
-         const originalLineIndex = sourceValue.substring(0, position.start).split("\n").length - 1;
-         const alignedIndex = map[originalLineIndex];
-         
-         if (alignedIndex !== undefined) {
-           const lineHeight = 20;
-           const scrollTop = alignedIndex * lineHeight - leftRef.current.clientHeight / 2;
-           leftRef.current.scrollTop = Math.max(0, scrollTop);
-           rightRef.current.scrollTop = Math.max(0, scrollTop);
-         }
-       }
+      // We need to find the path in the FORMATTED string, not the raw one
+      const position = findJsonPathInString(
+        sourceValue,
+        activeDiff.path,
+        targetValue
+      );
+      if (position) {
+        const originalLineIndex =
+          sourceValue.substring(0, position.start).split("\n").length - 1;
+        const alignedIndex = map[originalLineIndex];
+
+        if (alignedIndex !== undefined) {
+          const lineHeight = 20;
+          const scrollTop =
+            alignedIndex * lineHeight - leftRef.current.clientHeight / 2;
+          leftRef.current.scrollTop = Math.max(0, scrollTop);
+          rightRef.current.scrollTop = Math.max(0, scrollTop);
+        }
+      }
     }
   }, [activeDiff, formattedLeft, formattedRight, leftMap, rightMap]);
 
@@ -364,11 +373,14 @@ function AlignedDiffView({
             const isRemoved = line !== null && rightLine === null;
             const isGapForAdded = line === null && rightLine !== null;
             // Check if changed, but ignore comma differences
-            const isChanged = line !== null && rightLine !== null && !areLinesEqual(line, rightLine);
-            
+            const isChanged =
+              line !== null &&
+              rightLine !== null &&
+              !areLinesEqual(line, rightLine);
+
             return (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className={cn(
                   "whitespace-pre-wrap break-all min-h-[1.25rem]",
                   isRemoved && "bg-rose-100 dark:bg-rose-900/40", // Removed content
@@ -377,7 +389,7 @@ function AlignedDiffView({
                 )}
               >
                 {line === null ? (
-                  <span className="select-none text-transparent">.</span> 
+                  <span className="select-none text-transparent">.</span>
                 ) : (
                   <span>{line}</span>
                 )}
@@ -395,16 +407,19 @@ function AlignedDiffView({
           onScroll={() => handleScroll("right")}
           className="max-h-[calc(70vh-10rem)] min-h-80 w-full overflow-auto rounded-2xl border border-zinc-200 bg-white p-4 font-mono text-sm leading-5 text-zinc-900 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 dark:text-zinc-100"
         >
-           {rightLines.map((line, i) => {
+          {rightLines.map((line, i) => {
             const leftLine = leftLines[i];
             const isAdded = line !== null && leftLine === null;
             const isGapForRemoved = line === null && leftLine !== null;
             // Check if changed, but ignore comma differences
-            const isChanged = line !== null && leftLine !== null && !areLinesEqual(line, leftLine);
+            const isChanged =
+              line !== null &&
+              leftLine !== null &&
+              !areLinesEqual(line, leftLine);
 
             return (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className={cn(
                   "whitespace-pre-wrap break-all min-h-[1.25rem]",
                   isAdded && "bg-emerald-100 dark:bg-emerald-900/40", // Added content

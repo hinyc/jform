@@ -3,7 +3,8 @@ import { DiffViewer } from "../components/json-diff/DiffViewer";
 
 export const metadata: Metadata = {
   title: "JSON Diff | JForm",
-  description: "Compare two JSON objects side-by-side and highlight differences.",
+  description:
+    "Compare two JSON objects side-by-side and highlight differences.",
 };
 
 export default function DiffPage() {
@@ -15,5 +16,3 @@ export default function DiffPage() {
     </div>
   );
 }
-
-
