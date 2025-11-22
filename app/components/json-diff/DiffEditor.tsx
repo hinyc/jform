@@ -227,7 +227,7 @@ function EditorField({
       <span className="text-sm font-semibold text-zinc-600 dark:text-zinc-300">
         {label}
       </span>
-      <div className="relative w-full rounded-2xl border border-zinc-200 bg-white/90 shadow-sm transition focus-within:border-black focus-within:ring-2 focus-within:ring-black/10 dark:border-zinc-800 dark:bg-zinc-900/80 dark:focus-within:border-white dark:focus-within:ring-white/10">
+      <div className="relative w-full rounded-2xl border border-zinc-200 bg-white/90 shadow-sm transition  focus-within:ring-2 focus-within:ring-zinc-300 dark:border-zinc-800 dark:bg-zinc-900/80 dark:focus-within:border-white dark:focus-within:ring-white/10">
         <pre
           ref={backdropRef}
           className={cn(

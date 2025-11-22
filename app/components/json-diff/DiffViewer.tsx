@@ -70,7 +70,6 @@ export function DiffViewer() {
   };
 
   const blockLabels = {
-    path: t("jsonDiff.blocks.path", language),
     left: t("jsonDiff.blocks.left", language),
     right: t("jsonDiff.blocks.right", language),
     empty: t("jsonDiff.blocks.empty", language),

@@ -106,7 +106,7 @@ export function JsonFormatArea({
             variant="ghost"
             size="icon-sm"
             onClick={handleRemove}
-            className="text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            className="text-brand-error-500 hover:text-brand-error-600 dark:text-brand-error-400 dark:hover:text-brand-error-300 cursor-pointer"
           >
             <Trash2 className="size-4" />
           </Button>

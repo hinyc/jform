@@ -53,7 +53,7 @@ export function JsonInputCard({ id, initialValue = "" }: JsonInputCardProps) {
           value={localValue}
           onChange={(e) => handleChange(e.target.value)}
           placeholder={t("jsonFormatter.inputCard.placeholder", language)}
-          className="w-full h-full resize-none  rounded-lg px-3 py-6 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 overflow-x-auto"
+          className="w-full h-full resize-none  rounded-lg px-3 py-6 font-mono text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300 dark:bg-gray-900 dark:border-gray-700 dark:text-gray-100 overflow-x-auto"
         />
       </CardContent>
     </Card>
