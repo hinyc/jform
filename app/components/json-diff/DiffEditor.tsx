@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useRef, useState, useMemo } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import { DiffResult } from "@/lib/utils/compareObjects";
 import { findJsonPathInString } from "@/lib/utils/findJsonPathInString";
@@ -23,6 +24,11 @@ type DiffEditorProps = {
   };
   activeDiff: DiffResult | null;
   controlBar?: React.ReactNode;
+  searchResults?: {
+    leftLines: number[];
+    rightLines: number[];
+  };
+  currentSearchIndex: number;
 };
 
 export function DiffEditor({
@@ -34,6 +40,8 @@ export function DiffEditor({
   placeholders,
   activeDiff,
   controlBar,
+  searchResults,
+  currentSearchIndex,
 }: DiffEditorProps) {
   const { mode, setMode } = useDiffStore();
 
@@ -81,6 +89,8 @@ export function DiffEditor({
           rightValue={rightValue}
           labels={labels}
           activeDiff={activeDiff}
+          searchResults={searchResults}
+          currentSearchIndex={currentSearchIndex}
         />
       ) : (
         <div className="grid gap-4 md:grid-cols-2">
@@ -134,6 +144,21 @@ function EditorField({
     end: number;
   } | null>(null);
 
+  const scrollToPosition = useCallback(
+    (start: number) => {
+      if (textareaRef.current) {
+        const textarea = textareaRef.current;
+        const lineHeight = 20;
+        const linesBeforeSelection =
+          value.substring(0, start).split("\n").length - 1;
+        const scrollTop =
+          linesBeforeSelection * lineHeight - textarea.clientHeight / 2;
+        textarea.scrollTop = Math.max(0, scrollTop);
+      }
+    },
+    [value]
+  );
+
   useEffect(() => {
     if (!activeDiff) {
       setHighlightRange(null);
@@ -182,19 +207,7 @@ function EditorField({
     } else {
       setHighlightRange(null);
     }
-  }, [activeDiff, value, side]);
-
-  const scrollToPosition = (start: number) => {
-    if (textareaRef.current) {
-      const textarea = textareaRef.current;
-      const lineHeight = 20;
-      const linesBeforeSelection =
-        value.substring(0, start).split("\n").length - 1;
-      const scrollTop =
-        linesBeforeSelection * lineHeight - textarea.clientHeight / 2;
-      textarea.scrollTop = Math.max(0, scrollTop);
-    }
-  };
+  }, [activeDiff, value, side, scrollToPosition]);
 
   const handleScroll = () => {
     if (textareaRef.current && backdropRef.current) {
@@ -283,11 +296,18 @@ function AlignedDiffView({
   rightValue,
   labels,
   activeDiff,
+  searchResults,
+  currentSearchIndex,
 }: {
   leftValue: string;
   rightValue: string;
   labels: { left: string; right: string };
   activeDiff: DiffResult | null;
+  searchResults?: {
+    leftLines: number[];
+    rightLines: number[];
+  };
+  currentSearchIndex: number;
 }) {
   // Format values for comparison to ensure line diff makes sense
   const formattedLeft = useMemo(() => tryFormat(leftValue), [leftValue]);
@@ -337,6 +357,35 @@ function AlignedDiffView({
     }
   }, [activeDiff, formattedLeft, formattedRight, leftMap, rightMap]);
 
+  // Scroll to current search result
+  useEffect(() => {
+    if (!leftRef.current || !rightRef.current || !searchResults) return;
+
+    const leftLines = searchResults.leftLines || [];
+    const rightLines = searchResults.rightLines || [];
+    const totalSearchResults = leftLines.length + rightLines.length;
+    if (totalSearchResults === 0 || currentSearchIndex >= totalSearchResults)
+      return;
+
+    // Determine which line to scroll to
+    let lineIndex: number;
+    if (currentSearchIndex < leftLines.length) {
+      // Current result is in left panel
+      lineIndex = leftLines[currentSearchIndex];
+    } else {
+      // Current result is in right panel
+      lineIndex = rightLines[currentSearchIndex - leftLines.length];
+    }
+
+    if (lineIndex !== undefined) {
+      const lineHeight = 20;
+      const scrollTop =
+        lineIndex * lineHeight - leftRef.current.clientHeight / 2;
+      leftRef.current.scrollTop = Math.max(0, scrollTop);
+      rightRef.current.scrollTop = Math.max(0, scrollTop);
+    }
+  }, [currentSearchIndex, searchResults]);
+
   const handleScroll = (source: "left" | "right") => {
     const current = source === "left" ? leftRef.current : rightRef.current;
     const target = source === "left" ? rightRef.current : leftRef.current;
@@ -376,16 +425,52 @@ function AlignedDiffView({
             const isChanged =
               line !== null &&
               rightLine !== null &&
-              !areLinesEqual(line, rightLine);
+              !areLinesEqual(line as string, rightLine as string);
+
+            // Check if this line is in search results
+            const searchResultIndex =
+              searchResults?.leftLines?.indexOf(i) ?? -1;
+            const isInSearchResults = searchResultIndex !== -1;
+            const isCurrentSearch =
+              isInSearchResults && searchResultIndex === currentSearchIndex;
+
+            // Determine if this line has diff highlighting
+            const hasDiff = isRemoved || isChanged;
 
             return (
               <div
                 key={i}
                 className={cn(
-                  "whitespace-pre-wrap break-all min-h-[1.25rem]",
+                  "whitespace-pre-wrap break-all min-h-5",
+                  // Search result without diff → blue background + blue border
+                  isInSearchResults &&
+                    !hasDiff &&
+                    "bg-brand-primary-500/10 dark:bg-brand-primary-400/10 border-l-4 border-brand-primary-500 dark:border-brand-primary-400",
+                  isCurrentSearch &&
+                    !hasDiff &&
+                    "bg-brand-primary-500/20 dark:bg-brand-primary-400/20",
+                  // Diff highlighting (always applied, search or not)
                   isRemoved && "bg-rose-100 dark:bg-rose-900/40", // Removed content
                   isGapForAdded && "bg-emerald-50 dark:bg-emerald-900/20", // Gap for added
-                  isChanged && "bg-amber-100 dark:bg-amber-900/40" // Changed content
+                  isChanged && "bg-amber-100 dark:bg-amber-900/40", // Changed content
+                  // Current search with diff → stronger background
+                  isCurrentSearch &&
+                    hasDiff &&
+                    isRemoved &&
+                    "bg-rose-200 dark:bg-rose-900/60",
+                  isCurrentSearch &&
+                    hasDiff &&
+                    isChanged &&
+                    "bg-amber-200 dark:bg-amber-900/60",
+                  // Search result with diff → diff-colored border
+                  isInSearchResults &&
+                    hasDiff &&
+                    isRemoved &&
+                    "border-l-4 border-rose-500 dark:border-rose-400",
+                  isInSearchResults &&
+                    hasDiff &&
+                    isChanged &&
+                    "border-l-4 border-amber-500 dark:border-amber-400"
                 )}
               >
                 {line === null ? (
@@ -415,16 +500,54 @@ function AlignedDiffView({
             const isChanged =
               line !== null &&
               leftLine !== null &&
-              !areLinesEqual(line, leftLine);
+              !areLinesEqual(line as string, leftLine as string);
+
+            // Check if this line is in search results
+            const searchLeftLines = searchResults?.leftLines || [];
+            const searchRightLines = searchResults?.rightLines || [];
+            const searchResultIndex = searchRightLines.indexOf(i);
+            const isInSearchResults = searchResultIndex !== -1;
+            const isCurrentSearch =
+              isInSearchResults &&
+              searchResultIndex + searchLeftLines.length === currentSearchIndex;
+
+            // Determine if this line has diff highlighting
+            const hasDiff = isAdded || isChanged;
 
             return (
               <div
                 key={i}
                 className={cn(
-                  "whitespace-pre-wrap break-all min-h-[1.25rem]",
+                  "whitespace-pre-wrap break-all min-h-5",
+                  // Search result without diff → blue background + blue border
+                  isInSearchResults &&
+                    !hasDiff &&
+                    "bg-brand-primary-500/10 dark:bg-brand-primary-400/10 border-l-4 border-brand-primary-500 dark:border-brand-primary-400",
+                  isCurrentSearch &&
+                    !hasDiff &&
+                    "bg-brand-primary-500/20 dark:bg-brand-primary-400/20",
+                  // Diff highlighting (always applied, search or not)
                   isAdded && "bg-emerald-100 dark:bg-emerald-900/40", // Added content
                   isGapForRemoved && "bg-rose-50 dark:bg-rose-900/20", // Gap for removed
-                  isChanged && "bg-amber-100 dark:bg-amber-900/40" // Changed content
+                  isChanged && "bg-amber-100 dark:bg-amber-900/40", // Changed content
+                  // Current search with diff → stronger background
+                  isCurrentSearch &&
+                    hasDiff &&
+                    isAdded &&
+                    "bg-emerald-200 dark:bg-emerald-900/60",
+                  isCurrentSearch &&
+                    hasDiff &&
+                    isChanged &&
+                    "bg-amber-200 dark:bg-amber-900/60",
+                  // Search result with diff → diff-colored border
+                  isInSearchResults &&
+                    hasDiff &&
+                    isAdded &&
+                    "border-l-4 border-emerald-500 dark:border-emerald-400",
+                  isInSearchResults &&
+                    hasDiff &&
+                    isChanged &&
+                    "border-l-4 border-amber-500 dark:border-amber-400"
                 )}
               >
                 {line === null ? (
