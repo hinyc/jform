@@ -22,6 +22,9 @@ interface JsonFormatterState {
   indentDepth: number;
   typescriptInterfaces: Record<string, TypeScriptInterface>;
   pythonInterfaces: Record<string, PythonInterface>;
+  currentGlobalSearchIndex: number;
+  currentGlobalSearchInputId: string | null;
+  currentIndividualSearchIndex: Record<string, number>;
 
   addJsonObject: (rawText: string) => void;
   removeJsonObject: (id: string) => void;
@@ -35,6 +38,13 @@ interface JsonFormatterState {
   setIndentDepth: (depth: number) => void;
   generateTypeScriptInterface: (inputId: string) => void;
   generatePythonInterface: (inputId: string) => void;
+  setCurrentGlobalSearchIndex: (index: number) => void;
+  setCurrentGlobalSearchInputId: (inputId: string | null) => void;
+  setCurrentIndividualSearchIndex: (inputId: string, index: number) => void;
+  moveToNextGlobalSearchResult: () => void;
+  moveToPrevGlobalSearchResult: () => void;
+  moveToNextIndividualSearchResult: (inputId: string) => void;
+  moveToPrevIndividualSearchResult: (inputId: string) => void;
 }
 
 export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
@@ -46,6 +56,9 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
   indentDepth: 2,
   typescriptInterfaces: {},
   pythonInterfaces: {},
+  currentGlobalSearchIndex: 0,
+  currentGlobalSearchInputId: null,
+  currentIndividualSearchIndex: {},
 
   addJsonObject: (rawText: string) => {
     const id = crypto.randomUUID();
@@ -119,7 +132,7 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
     const { jsonObjects, searchQuery } = get();
 
     if (!searchQuery.trim()) {
-      set({ searchResults: [] });
+      set({ searchResults: [], currentGlobalSearchIndex: 0, currentGlobalSearchInputId: null });
       return;
     }
 
@@ -196,20 +209,38 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
       }
     });
 
-    set({ searchResults: results });
+    // 검색 결과가 있으면 첫 번째 결과로 초기화
+    const firstInputId = results.length > 0 ? results[0].inputId : null;
+    set({ 
+      searchResults: results,
+      currentGlobalSearchIndex: 0,
+      currentGlobalSearchInputId: firstInputId,
+    });
   },
 
   clearSearch: () => {
-    set({ searchQuery: "", searchResults: [] });
+    set({ 
+      searchQuery: "", 
+      searchResults: [],
+      currentGlobalSearchIndex: 0,
+      currentGlobalSearchInputId: null,
+    });
   },
 
   setSearchMode: (mode: "global" | "individual") => {
     set({ searchMode: mode });
     // 모드 변경 시 검색 결과 초기화
     if (mode === "global") {
-      set({ individualSearchResults: {} });
+      set({ 
+        individualSearchResults: {},
+        currentIndividualSearchIndex: {},
+      });
     } else {
-      set({ searchResults: [] });
+      set({ 
+        searchResults: [],
+        currentGlobalSearchIndex: 0,
+        currentGlobalSearchInputId: null,
+      });
     }
   },
 
@@ -305,6 +336,10 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
         ...state.individualSearchResults,
         [inputId]: results,
       },
+      currentIndividualSearchIndex: {
+        ...state.currentIndividualSearchIndex,
+        [inputId]: 0,
+      },
     }));
   },
 
@@ -312,7 +347,12 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
     set((state) => {
       const newIndividualResults = { ...state.individualSearchResults };
       delete newIndividualResults[inputId];
-      return { individualSearchResults: newIndividualResults };
+      const newIndividualIndex = { ...state.currentIndividualSearchIndex };
+      delete newIndividualIndex[inputId];
+      return { 
+        individualSearchResults: newIndividualResults,
+        currentIndividualSearchIndex: newIndividualIndex,
+      };
     });
   },
 
@@ -416,5 +456,76 @@ export const useJsonFormatterStore = create<JsonFormatterState>((set, get) => ({
         },
       }));
     }
+  },
+
+  setCurrentGlobalSearchIndex: (index: number) => {
+    set({ currentGlobalSearchIndex: index });
+  },
+
+  setCurrentGlobalSearchInputId: (inputId: string | null) => {
+    set({ currentGlobalSearchInputId: inputId });
+  },
+
+  setCurrentIndividualSearchIndex: (inputId: string, index: number) => {
+    set((state) => ({
+      currentIndividualSearchIndex: {
+        ...state.currentIndividualSearchIndex,
+        [inputId]: index,
+      },
+    }));
+  },
+
+  moveToNextGlobalSearchResult: () => {
+    const { searchResults, currentGlobalSearchIndex } = get();
+    if (searchResults.length === 0) return;
+
+    const nextIndex = (currentGlobalSearchIndex + 1) % searchResults.length;
+    const nextResult = searchResults[nextIndex];
+    set({
+      currentGlobalSearchIndex: nextIndex,
+      currentGlobalSearchInputId: nextResult.inputId,
+    });
+  },
+
+  moveToPrevGlobalSearchResult: () => {
+    const { searchResults, currentGlobalSearchIndex } = get();
+    if (searchResults.length === 0) return;
+
+    const prevIndex = (currentGlobalSearchIndex - 1 + searchResults.length) % searchResults.length;
+    const prevResult = searchResults[prevIndex];
+    set({
+      currentGlobalSearchIndex: prevIndex,
+      currentGlobalSearchInputId: prevResult.inputId,
+    });
+  },
+
+  moveToNextIndividualSearchResult: (inputId: string) => {
+    const { individualSearchResults, currentIndividualSearchIndex } = get();
+    const results = individualSearchResults[inputId] || [];
+    if (results.length === 0) return;
+
+    const currentIndex = currentIndividualSearchIndex[inputId] ?? 0;
+    const nextIndex = (currentIndex + 1) % results.length;
+    set((state) => ({
+      currentIndividualSearchIndex: {
+        ...state.currentIndividualSearchIndex,
+        [inputId]: nextIndex,
+      },
+    }));
+  },
+
+  moveToPrevIndividualSearchResult: (inputId: string) => {
+    const { individualSearchResults, currentIndividualSearchIndex } = get();
+    const results = individualSearchResults[inputId] || [];
+    if (results.length === 0) return;
+
+    const currentIndex = currentIndividualSearchIndex[inputId] ?? 0;
+    const prevIndex = (currentIndex - 1 + results.length) % results.length;
+    set((state) => ({
+      currentIndividualSearchIndex: {
+        ...state.currentIndividualSearchIndex,
+        [inputId]: prevIndex,
+      },
+    }));
   },
 }));

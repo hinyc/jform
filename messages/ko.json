@@ -31,7 +31,9 @@
       "jsonTab": "결과",
       "interfaceTab": "구조/인터페이스",
       "typescriptTab": "TypeScript",
-      "pythonTab": "Python"
+      "pythonTab": "Python",
+      "expandAll": "전체 펼치기",
+      "collapseAll": "전체 닫기"
     },
     "searchBar": {
       "placeholder": "키나 값을 검색하세요...",

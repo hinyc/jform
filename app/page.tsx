@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { JsonFormatArea } from "./components/json-formatter/JsonFormatArea";
 import { JsonFormatterHeader } from "./components/json-formatter/JsonFormatterHeader";
 import { loadJsonFromUrl } from "./components/json-formatter/ShareButton";
@@ -11,6 +11,10 @@ export default function Home() {
   const jsonObjects = useJsonFormatterStore((state) => state.jsonObjects);
   const searchMode = useJsonFormatterStore((state) => state.searchMode);
   const searchResults = useJsonFormatterStore((state) => state.searchResults);
+  const currentGlobalSearchInputId = useJsonFormatterStore(
+    (state) => state.currentGlobalSearchInputId
+  );
+  const areaRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
     const urlData = loadJsonFromUrl();
@@ -27,6 +31,28 @@ export default function Home() {
     }
   }, [addJsonObject, jsonObjects.length]);
 
+  // 전체 검색 모드에서 여러 JsonFormatArea 간 이동 처리
+  const currentGlobalSearchIndex = useJsonFormatterStore(
+    (state) => state.currentGlobalSearchIndex
+  );
+
+  useEffect(() => {
+    if (
+      searchMode === "global" &&
+      currentGlobalSearchInputId &&
+      areaRefs.current[currentGlobalSearchInputId]
+    ) {
+      // JsonFormatArea로 스크롤
+      const areaElement = areaRefs.current[currentGlobalSearchInputId];
+      if (areaElement) {
+        areaElement.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }
+  }, [searchMode, currentGlobalSearchInputId, currentGlobalSearchIndex]);
+
   return (
     <div className="flex min-h-screen bg-zinc-50 font-sans dark:bg-black pt-18">
       <main className="flex w-full flex-col gap-6 p-6">
@@ -36,12 +62,18 @@ export default function Home() {
         {/* JsonFormatArea 리스트 */}
         <div className="flex flex-col gap-6">
           {jsonObjects.map((jsonObj) => (
-            <JsonFormatArea
+            <div
               key={jsonObj.id}
-              jsonObject={jsonObj}
-              searchMode={searchMode}
-              globalSearchResults={searchResults}
-            />
+              ref={(el) => {
+                areaRefs.current[jsonObj.id] = el;
+              }}
+            >
+              <JsonFormatArea
+                jsonObject={jsonObj}
+                searchMode={searchMode}
+                globalSearchResults={searchResults}
+              />
+            </div>
           ))}
         </div>
       </main>

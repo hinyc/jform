@@ -31,7 +31,9 @@
       "jsonTab": "Result",
       "interfaceTab": "Structure/Interface",
       "typescriptTab": "TypeScript",
-      "pythonTab": "Python"
+      "pythonTab": "Python",
+      "expandAll": "Expand All",
+      "collapseAll": "Collapse All"
     },
     "searchBar": {
       "placeholder": "Search for keys or values...",

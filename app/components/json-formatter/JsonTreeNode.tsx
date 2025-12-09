@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useI18nStore } from "@/lib/stores/i18nStore";
@@ -17,6 +17,9 @@ interface JsonTreeNodeProps {
   inputId?: string;
   pathsToExpand?: Set<string>;
   indentDepth?: number;
+  currentSearchIndex?: number;
+  nodeRef?: React.RefObject<HTMLDivElement | null>;
+  expandAll?: boolean;
 }
 
 function formatValue(value: unknown): string {
@@ -50,6 +53,9 @@ export function JsonTreeNode({
   inputId = "",
   pathsToExpand = new Set(),
   indentDepth = 2,
+  currentSearchIndex = -1,
+  nodeRef,
+  expandAll,
 }: JsonTreeNodeProps) {
   const valueType = getValueType(value);
   const isExpandable = valueType === "object" || valueType === "array";
@@ -64,24 +70,34 @@ export function JsonTreeNode({
   const isKeyHighlighted = currentSearchResult?.matchedField === "key";
   const isValueHighlighted = currentSearchResult?.matchedField === "value";
 
+  // 현재 검색 인덱스에 해당하는 결과인지 확인
+  const relevantResults = searchResults.filter(
+    (result) => result.inputId === inputId
+  );
+  const resultIndex = relevantResults.findIndex(
+    (result) => result.path === path
+  );
+  const isCurrentSearchResult =
+    resultIndex === currentSearchIndex && resultIndex >= 0;
+
   // 초기 렌더링 시 확장해야 하는 경로인지 확인
   const shouldExpandInitially = pathsToExpand.has(path) && isExpandable;
   const [isExpanded, setIsExpanded] = useState(
     shouldExpandInitially || depth < 2
   );
 
-  // 검색 결과가 있을 때만 한 번 자동 확장 (사용자 조작은 이후 자유롭게)
-  const prevPathsToExpandRef = useRef<Set<string>>(new Set());
+  // expandAll prop이 변경되면 모든 노드 확장/축소
   useEffect(() => {
-    // pathsToExpand가 새로 추가되었을 때만 확장
-    const wasInPrevious = prevPathsToExpandRef.current.has(path);
-    const isInCurrent = pathsToExpand.has(path);
+    if (expandAll !== undefined && isExpandable) {
+      setIsExpanded(expandAll);
+    }
+  }, [expandAll, isExpandable]);
 
-    if (!wasInPrevious && isInCurrent && isExpandable && !isExpanded) {
+  // 검색 결과가 있을 때 자동 확장
+  useEffect(() => {
+    if (pathsToExpand.has(path) && isExpandable && !isExpanded) {
       setIsExpanded(true);
     }
-
-    prevPathsToExpandRef.current = new Set(pathsToExpand);
   }, [pathsToExpand, path, isExpandable, isExpanded]);
 
   const toggleExpand = () => {
@@ -98,7 +114,12 @@ export function JsonTreeNode({
       <span
         className={cn(
           "text-blue-600 dark:text-blue-400 font-medium",
-          isKeyHighlighted && "bg-yellow-200 dark:bg-yellow-800 rounded px-1"
+          isKeyHighlighted &&
+            !isCurrentSearchResult &&
+            "bg-yellow-200 dark:bg-yellow-800 rounded px-1",
+          isKeyHighlighted &&
+            isCurrentSearchResult &&
+            "bg-yellow-400 dark:bg-yellow-600 rounded px-1"
         )}
       >
         {keyDisplay}
@@ -121,7 +142,12 @@ export function JsonTreeNode({
       <span
         className={cn(
           valueClass,
-          isValueHighlighted && "bg-yellow-200 dark:bg-yellow-800 rounded px-1"
+          isValueHighlighted &&
+            !isCurrentSearchResult &&
+            "bg-yellow-200 dark:bg-yellow-800 rounded px-1",
+          isValueHighlighted &&
+            isCurrentSearchResult &&
+            "bg-yellow-400 dark:bg-yellow-600 rounded px-1"
         )}
       >
         {formatted}
@@ -157,6 +183,9 @@ export function JsonTreeNode({
                 inputId={inputId}
                 pathsToExpand={pathsToExpand}
                 indentDepth={indentDepth}
+                currentSearchIndex={currentSearchIndex}
+                expandAll={expandAll}
+                nodeRef={nodeRef}
               />
             );
           })}
@@ -181,6 +210,9 @@ export function JsonTreeNode({
                 inputId={inputId}
                 pathsToExpand={pathsToExpand}
                 indentDepth={indentDepth}
+                currentSearchIndex={currentSearchIndex}
+                expandAll={expandAll}
+                nodeRef={nodeRef}
               />
             );
           })}
@@ -194,7 +226,10 @@ export function JsonTreeNode({
   // Primitive value - single line
   if (!isExpandable) {
     return (
-      <div className="flex items-start gap-1 py-0.5">
+      <div
+        ref={isCurrentSearchResult ? nodeRef : undefined}
+        className="flex items-start gap-1 py-0.5"
+      >
         <span className="select-none whitespace-pre font-mono text-transparent">
           {indentSpaces}
         </span>
@@ -220,7 +255,10 @@ export function JsonTreeNode({
   if (!isExpanded) {
     // Collapsed view - single line
     return (
-      <div className="flex items-start gap-1 py-0.5">
+      <div
+        ref={isCurrentSearchResult ? nodeRef : undefined}
+        className="flex items-start gap-1 py-0.5"
+      >
         <span className="select-none whitespace-pre font-mono text-transparent">
           {indentSpaces}
         </span>
@@ -257,7 +295,10 @@ export function JsonTreeNode({
   return (
     <>
       {/* Opening line with key and bracket */}
-      <div className="flex items-start gap-1 py-0.5">
+      <div
+        ref={isCurrentSearchResult ? nodeRef : undefined}
+        className="flex items-start gap-1 py-0.5"
+      >
         <span className="select-none whitespace-pre font-mono text-transparent">
           {indentSpaces}
         </span>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, X } from "lucide-react";
+import { Search, X, ChevronUp, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useJsonFormatterStore } from "@/lib/stores/jsonFormatterStore";
@@ -28,6 +28,24 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
   const individualSearchResults = useJsonFormatterStore(
     (state) => state.individualSearchResults
   );
+  const currentGlobalSearchIndex = useJsonFormatterStore(
+    (state) => state.currentGlobalSearchIndex
+  );
+  const currentIndividualSearchIndex = useJsonFormatterStore(
+    (state) => state.currentIndividualSearchIndex
+  );
+  const moveToNextGlobalSearchResult = useJsonFormatterStore(
+    (state) => state.moveToNextGlobalSearchResult
+  );
+  const moveToPrevGlobalSearchResult = useJsonFormatterStore(
+    (state) => state.moveToPrevGlobalSearchResult
+  );
+  const moveToNextIndividualSearchResult = useJsonFormatterStore(
+    (state) => state.moveToNextIndividualSearchResult
+  );
+  const moveToPrevIndividualSearchResult = useJsonFormatterStore(
+    (state) => state.moveToPrevIndividualSearchResult
+  );
   const language = useI18nStore((state) => state.language);
 
   // 개별 검색 모드면 해당 inputId의 검색 결과를 사용, 아니면 전체 검색 결과 사용
@@ -35,10 +53,17 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
     ? individualSearchResults[inputId] || []
     : searchResults;
 
+  // 현재 검색 인덱스
+  const currentSearchIndex = inputId
+    ? currentIndividualSearchIndex[inputId] ?? 0
+    : currentGlobalSearchIndex;
+
   // 개별 검색 모드면 로컬 상태로 관리, 전체 검색 모드면 store의 searchQuery 사용
   const [localQuery, setLocalQuery] = useState("");
   // 검색을 실행했는지 여부 추적
   const [hasSearched, setHasSearched] = useState(false);
+  // 이전 검색 쿼리 추적 (엔터 키 처리용)
+  const [prevQuery, setPrevQuery] = useState("");
 
   const queryValue = inputId ? localQuery : searchQuery;
 
@@ -60,6 +85,7 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
       performSearch();
     }
     setHasSearched(true);
+    setPrevQuery(queryValue);
   };
 
   const handleClear = () => {
@@ -74,9 +100,42 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter") {
-      handleSearch();
+      const currentValue = e.currentTarget.value.trim();
+      // 검색 쿼리가 변경되지 않고 검색 결과가 있으면 다음 결과로 이동
+      if (currentValue === prevQuery && currentSearchResults.length > 0) {
+        e.preventDefault();
+        if (inputId) {
+          moveToNextIndividualSearchResult(inputId);
+        } else {
+          moveToNextGlobalSearchResult();
+        }
+      } else {
+        // 검색 쿼리가 변경되면 새 검색 수행
+        handleSearch();
+      }
     }
   };
+
+  const handleSearchPrev = () => {
+    if (currentSearchResults.length === 0) return;
+    if (inputId) {
+      moveToPrevIndividualSearchResult(inputId);
+    } else {
+      moveToPrevGlobalSearchResult();
+    }
+  };
+
+  const handleSearchNext = () => {
+    if (currentSearchResults.length === 0) return;
+    if (inputId) {
+      moveToNextIndividualSearchResult(inputId);
+    } else {
+      moveToNextGlobalSearchResult();
+    }
+  };
+
+  const totalSearchResults = currentSearchResults.length;
+  const showNavigation = hasSearched && queryValue.trim() && totalSearchResults > 0;
 
   return (
     <div className="flex flex-col gap-2">
@@ -107,12 +166,46 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
         </Button>
       </div>
       {hasSearched && queryValue.trim() && (
-        <div className="text-sm text-gray-600 dark:text-gray-400">
-          {currentSearchResults.length > 0
-            ? language === "ko"
-              ? `${currentSearchResults.length}${t("jsonFormatter.searchBar.resultsFound", language)}`
-              : `${currentSearchResults.length} ${t("jsonFormatter.searchBar.resultsFound", language)}`
-            : t("jsonFormatter.searchBar.noResults", language)}
+        <div className="flex items-center gap-2">
+          <div className="text-sm text-gray-600 dark:text-gray-400">
+            {totalSearchResults > 0
+              ? language === "ko"
+                ? `${totalSearchResults}${t("jsonFormatter.searchBar.resultsFound", language)}`
+                : `${totalSearchResults} ${t("jsonFormatter.searchBar.resultsFound", language)}`
+              : t("jsonFormatter.searchBar.noResults", language)}
+          </div>
+          {showNavigation && (
+            <>
+              <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
+                <span className="inline-block w-8 text-right">
+                  {currentSearchIndex + 1}
+                </span>
+                &nbsp;/ {totalSearchResults}
+              </span>
+              <div className="flex items-center">
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={handleSearchPrev}
+                  aria-label="Previous search result"
+                  disabled={disabled}
+                >
+                  <ChevronUp className="size-6 text-zinc-500 dark:text-zinc-400" />
+                </Button>
+                <Button
+                  type="button"
+                  size="icon-sm"
+                  variant="ghost"
+                  onClick={handleSearchNext}
+                  aria-label="Next search result"
+                  disabled={disabled}
+                >
+                  <ChevronDown className="size-6 text-zinc-500 dark:text-zinc-400" />
+                </Button>
+              </div>
+            </>
+          )}
         </div>
       )}
     </div>

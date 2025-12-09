@@ -1,5 +1,6 @@
 "use client";
 
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DiffEditor } from "./DiffEditor";
 import { DiffControlBar } from "./DiffControlBar";
@@ -248,7 +249,7 @@ export function DiffViewer() {
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
               searchResults={searchResultsForControlBar}
-              onSearchResults={(results) => {
+              onSearchResults={() => {
                 // Convert back to SearchResult[] format if needed
                 // For now, we'll just ignore this since we manage searchResults in DiffViewer
               }}
