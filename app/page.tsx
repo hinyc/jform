@@ -17,18 +17,28 @@ export default function Home() {
   const areaRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   useEffect(() => {
-    const urlData = loadJsonFromUrl();
-    if (urlData.length > 0 && jsonObjects.length === 0) {
-      urlData.forEach((rawText) => {
-        if (rawText.trim()) {
-          addJsonObject(rawText);
-        }
-      });
-    }
-    // URL 데이터가 없고 jsonObjects가 비어있으면 기본으로 하나 추가
-    if (urlData.length === 0 && jsonObjects.length === 0) {
-      addJsonObject("");
-    }
+    const loadData = () => {
+      const urlData = loadJsonFromUrl();
+      if (urlData.length > 0 && jsonObjects.length === 0) {
+        urlData.forEach((rawText) => {
+          if (rawText.trim()) {
+            addJsonObject(rawText);
+          }
+        });
+      }
+      // URL 데이터가 없고 jsonObjects가 비어있으면 기본으로 하나 추가
+      if (urlData.length === 0 && jsonObjects.length === 0) {
+        addJsonObject("");
+      }
+    };
+
+    // 초기 로드 및 hash 변경 감지
+    loadData();
+    window.addEventListener('hashchange', loadData);
+    
+    return () => {
+      window.removeEventListener('hashchange', loadData);
+    };
   }, [addJsonObject, jsonObjects.length]);
 
   // 전체 검색 모드에서 여러 JsonFormatArea 간 이동 처리

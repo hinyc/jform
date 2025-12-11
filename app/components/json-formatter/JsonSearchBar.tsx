@@ -13,7 +13,10 @@ interface JsonSearchBarProps {
   disabled?: boolean;
 }
 
-export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps) {
+export function JsonSearchBar({
+  inputId,
+  disabled = false,
+}: JsonSearchBarProps) {
   const searchQuery = useJsonFormatterStore((state) => state.searchQuery);
   const setSearchQuery = useJsonFormatterStore((state) => state.setSearchQuery);
   const performSearch = useJsonFormatterStore((state) => state.performSearch);
@@ -135,7 +138,8 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
   };
 
   const totalSearchResults = currentSearchResults.length;
-  const showNavigation = hasSearched && queryValue.trim() && totalSearchResults > 0;
+  const showNavigation =
+    hasSearched && queryValue.trim() && totalSearchResults > 0;
 
   return (
     <div className="flex flex-col gap-2">
@@ -148,41 +152,21 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
             value={queryValue}
             onChange={(e) => handleChange(e.target.value)}
             onKeyDown={handleKeyPress}
-            className="pl-9 pr-9"
+            className={`pl-9 ${
+              hasSearched && queryValue.trim() && totalSearchResults > 0
+                ? "pr-36"
+                : "pr-9"
+            }`}
             disabled={disabled}
           />
-          {queryValue && (
-            <button
-              onClick={handleClear}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-              disabled={disabled}
-            >
-              <X className="size-4" />
-            </button>
-          )}
-        </div>
-        <Button onClick={handleSearch} size="default" disabled={disabled}>
-          {t("common.search", language)}
-        </Button>
-      </div>
-      {hasSearched && queryValue.trim() && (
-        <div className="flex items-center gap-2">
-          <div className="text-sm text-gray-600 dark:text-gray-400">
-            {totalSearchResults > 0
-              ? language === "ko"
-                ? `${totalSearchResults}${t("jsonFormatter.searchBar.resultsFound", language)}`
-                : `${totalSearchResults} ${t("jsonFormatter.searchBar.resultsFound", language)}`
-              : t("jsonFormatter.searchBar.noResults", language)}
-          </div>
-          {showNavigation && (
-            <>
-              <span className="text-sm font-semibold text-zinc-500 dark:text-zinc-400">
-                <span className="inline-block w-8 text-right">
-                  {currentSearchIndex + 1}
+
+          {/* Right side controls: Results Count + Navigation + Clear */}
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex items-center gap-1">
+            {hasSearched && queryValue.trim() && totalSearchResults > 0 && (
+              <>
+                <span className="text-xs text-zinc-500 dark:text-zinc-400 mr-1 font-mono">
+                  {currentSearchIndex + 1}/{totalSearchResults}
                 </span>
-                &nbsp;/ {totalSearchResults}
-              </span>
-              <div className="flex items-center">
                 <Button
                   type="button"
                   size="icon-sm"
@@ -190,8 +174,9 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
                   onClick={handleSearchPrev}
                   aria-label="Previous search result"
                   disabled={disabled}
+                  className="h-6 w-6 p-0"
                 >
-                  <ChevronUp className="size-6 text-zinc-500 dark:text-zinc-400" />
+                  <ChevronUp className="size-4 text-zinc-500 dark:text-zinc-400" />
                 </Button>
                 <Button
                   type="button"
@@ -200,14 +185,30 @@ export function JsonSearchBar({ inputId, disabled = false }: JsonSearchBarProps)
                   onClick={handleSearchNext}
                   aria-label="Next search result"
                   disabled={disabled}
+                  className="h-6 w-6 p-0"
                 >
-                  <ChevronDown className="size-6 text-zinc-500 dark:text-zinc-400" />
+                  <ChevronDown className="size-4 text-zinc-500 dark:text-zinc-400" />
                 </Button>
-              </div>
-            </>
-          )}
+                <div className="w-px h-4 bg-gray-200 dark:bg-gray-700 mx-1" />
+              </>
+            )}
+
+            {queryValue && (
+              <button
+                onClick={handleClear}
+                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1"
+                disabled={disabled}
+                aria-label="Clear search"
+              >
+                <X className="size-4" />
+              </button>
+            )}
+          </div>
         </div>
-      )}
+        <Button onClick={handleSearch} size="default" disabled={disabled}>
+          {t("common.search", language)}
+        </Button>
+      </div>
     </div>
   );
 }
